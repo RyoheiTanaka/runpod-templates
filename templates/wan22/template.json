@@ -1,0 +1,18 @@
+{
+  "name": "wan22",
+  "description": "Wan2.2 video generation template for ComfyUI on RunPod.",
+  "image": "runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04",
+  "containerDiskInGb": 200,
+  "volumeInGb": 0,
+  "ports": [
+    "8188/http",
+    "22/tcp"
+  ],
+  "env": {
+    "WAN_VARIANT": "t2v_a14b",
+    "RUNPOD_TEMPLATES_REF": "main",
+    "COMFY_PORT": "8188",
+    "HF_TOKEN": "your-huggingface-token"
+  },
+  "startCommand": "bash -c 'RUNPOD_TEMPLATES_REF=\"${RUNPOD_TEMPLATES_REF:-main}\"; curl -fsSL \"https://raw.githubusercontent.com/RyoheiTanaka/runpod-templates/${RUNPOD_TEMPLATES_REF}/templates/wan22/setup.sh\" | bash'"
+}
