@@ -137,6 +137,6 @@ esac
 
 echo "[setup] ready: ComfyUI will listen on 0.0.0.0:${COMFY_PORT}"
 cd "${COMFY_DIR}"
-python main.py --listen 0.0.0.0 --port "${COMFY_PORT}" &
+python main.py --listen 0.0.0.0 --port "${COMFY_PORT}" --enable-cors-header "*" &
 APP_PID=$!
 wait "${APP_PID}"
