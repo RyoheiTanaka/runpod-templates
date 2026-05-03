@@ -47,9 +47,10 @@ bash -c "curl -fsSL https://raw.githubusercontent.com/RyoheiTanaka/runpod-templa
 | `COMFY_PORT` | `8188` | ComfyUI の listen port。 |
 | `WORKSPACE` | `/workspace` | ComfyUI、モデル、cache、ログの基準ディレクトリ。 |
 | `HF_HOME` | `/workspace/.cache/huggingface` | Hugging Face cache ディレクトリ。 |
-| `HF_TOKEN` | 未設定 | 任意。Hugging Face の認証が必要な場合は RunPod の環境変数として設定します。 |
+| `HF_TOKEN` | `your-huggingface-token` | 任意。Hugging Face の認証が必要な場合は RunPod の環境変数として実 token に置き換えます。 |
 
 `WAN_VARIANT=all` は、必要なモデル容量が大きすぎるため初期版では意図的に非対応です。
+`HF_TOKEN=your-huggingface-token` はプレースホルダーとして扱い、setup script 内では token 未設定として無視します。
 
 ### 配置先
 

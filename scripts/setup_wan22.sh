@@ -19,6 +19,11 @@ echo "[setup] start: $(date -Iseconds)"
 echo "[setup] workspace: ${WORKSPACE}"
 echo "[setup] variant: ${WAN_VARIANT}"
 
+if [ "${HF_TOKEN:-}" = "your-huggingface-token" ]; then
+  echo "[setup] HF_TOKEN is a placeholder, ignoring it"
+  unset HF_TOKEN
+fi
+
 if [ "${WAN_VARIANT}" = "all" ]; then
   echo "[setup] error: WAN_VARIANT=all is intentionally unsupported. Use t2v_a14b, i2v_a14b, or ti2v_5b."
   exit 2
