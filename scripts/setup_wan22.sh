@@ -104,14 +104,14 @@ download_t2v_a14b() {
 }
 
 download_i2v_a14b() {
-  download_model "split_files/diffusion_models/wan2.2_i2v_high_noise_14B_fp16.safetensors"
-  download_model "split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp16.safetensors"
+  download_model "split_files/diffusion_models/wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors"
+  download_model "split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors"
   download_model "split_files/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors"
   download_model "split_files/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors"
   download_model "split_files/vae/wan_2.1_vae.safetensors"
 
-  install_from_split_files "diffusion_models" "wan2.2_i2v_high_noise_14B_fp16.safetensors"
-  install_from_split_files "diffusion_models" "wan2.2_i2v_low_noise_14B_fp16.safetensors"
+  install_from_split_files "diffusion_models" "wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors"
+  install_from_split_files "diffusion_models" "wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors"
   install_from_split_files "loras" "wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors"
   install_from_split_files "loras" "wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors"
   install_from_split_files "vae" "wan_2.1_vae.safetensors"
