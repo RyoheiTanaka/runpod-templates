@@ -106,7 +106,7 @@ Hugging Face の認証が必要なモデルでなくても、モデル download 
 | `/workspace/ComfyUI/models/*` | ダウンロード済みモデルへの symlink |
 | `/workspace/logs` | setup log |
 
-`WAN_VARIANT=t2v_a14b` では、ComfyUI の高速化 workflow で使われる LightX2V 4-step LoRA も `/workspace/ComfyUI/models/loras` に配置します。
+`WAN_VARIANT=t2v_a14b` と `WAN_VARIANT=i2v_a14b` では、ComfyUI の高速化 workflow で使われる LightX2V 4-step LoRA も `/workspace/ComfyUI/models/loras` に配置します。
 
 ## 注意
 
