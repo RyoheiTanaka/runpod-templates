@@ -21,8 +21,6 @@ RunPod で AI 環境を起動するためのテンプレート集です。
 ```text
 runpod-templates/
   README.md
-  scripts/
-    setup_wan22.sh
   templates/
     wan22/
       README.md
@@ -33,7 +31,6 @@ runpod-templates/
 ## Notes
 
 - モデルファイルはこの repo には含めません。
-- `scripts/setup_wan22.sh` は古い Start Command 互換用 wrapper です。新規 template は `templates/wan22/setup.sh` を直接参照してください。
 - 安定運用時は Start Command の `RUNPOD_TEMPLATES_REF` を release tag または commit SHA に固定してください。
 - 検証後は想定外の GPU 課金を避けるため、test pod を停止または削除してください。
 
