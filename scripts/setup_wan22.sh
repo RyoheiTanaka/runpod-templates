@@ -40,7 +40,7 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
   libglib2.0-0
 
 python -m pip install --no-cache-dir \
-  "huggingface_hub[cli]" \
+  huggingface_hub \
   hf_transfer
 
 export HF_HUB_ENABLE_HF_TRANSFER="${HF_HUB_ENABLE_HF_TRANSFER:-1}"
@@ -65,7 +65,7 @@ download_model() {
   fi
 
   echo "[setup] downloading ${include_pattern}"
-  huggingface-cli download Comfy-Org/Wan_2.2_ComfyUI_Repackaged \
+  hf download Comfy-Org/Wan_2.2_ComfyUI_Repackaged \
     --include "${include_pattern}" \
     --local-dir "${MODEL_ROOT}/comfy-repackaged"
 }
