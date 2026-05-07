@@ -2,7 +2,7 @@
   "name": "acestep15xl",
   "description": "ACE-Step 1.5 XL music generation template for ComfyUI on RunPod.",
   "image": "runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04",
-  "containerDiskInGb": 80,
+  "containerDiskInGb": 100,
   "volumeInGb": 0,
   "ports": [
     "8188/http",
@@ -10,7 +10,7 @@
   ],
   "env": {
     "ACESTEP_XL_VARIANT": "all",
-    "ACESTEP_LM": "qwen_1.7b",
+    "ACESTEP_LM": "all",
     "RUNPOD_TEMPLATES_REF": "main",
     "COMFY_PORT": "8188",
     "HF_HUB_ENABLE_HF_TRANSFER": "1",

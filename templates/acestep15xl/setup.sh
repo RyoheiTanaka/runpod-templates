@@ -4,7 +4,7 @@ set -euo pipefail
 WORKSPACE="${WORKSPACE:-/workspace}"
 COMFY_PORT="${COMFY_PORT:-8188}"
 ACESTEP_XL_VARIANT="${ACESTEP_XL_VARIANT:-all}"
-ACESTEP_LM="${ACESTEP_LM:-qwen_1.7b}"
+ACESTEP_LM="${ACESTEP_LM:-all}"
 
 COMFY_DIR="${WORKSPACE}/ComfyUI"
 MODEL_ROOT="${WORKSPACE}/models/acestep15xl"
@@ -107,16 +107,23 @@ esac
 
 case "${ACESTEP_LM}" in
   qwen_0.6b)
-    TEXT_ENCODER="qwen_0.6b_ace15.safetensors"
+    TEXT_ENCODERS=("qwen_0.6b_ace15.safetensors")
     ;;
   qwen_1.7b)
-    TEXT_ENCODER="qwen_1.7b_ace15.safetensors"
+    TEXT_ENCODERS=("qwen_1.7b_ace15.safetensors")
     ;;
   qwen_4b)
-    TEXT_ENCODER="qwen_4b_ace15.safetensors"
+    TEXT_ENCODERS=("qwen_4b_ace15.safetensors")
+    ;;
+  all)
+    TEXT_ENCODERS=(
+      "qwen_0.6b_ace15.safetensors"
+      "qwen_1.7b_ace15.safetensors"
+      "qwen_4b_ace15.safetensors"
+    )
     ;;
   *)
-    echo "[setup] error: unsupported ACESTEP_LM=${ACESTEP_LM}. Use qwen_0.6b, qwen_1.7b, or qwen_4b."
+    echo "[setup] error: unsupported ACESTEP_LM=${ACESTEP_LM}. Use qwen_0.6b, qwen_1.7b, qwen_4b, or all."
     exit 2
     ;;
 esac
@@ -126,10 +133,13 @@ for diffusion_model in "${DIFFUSION_MODELS[@]}"; do
   install_from_split_files "diffusion_models" "${diffusion_model}"
 done
 
-download_model "split_files/text_encoders/${TEXT_ENCODER}"
+for text_encoder in "${TEXT_ENCODERS[@]}"; do
+  download_model "split_files/text_encoders/${text_encoder}"
+  install_from_split_files "text_encoders" "${text_encoder}"
+done
+
 download_model "split_files/vae/ace_1.5_vae.safetensors"
 
-install_from_split_files "text_encoders" "${TEXT_ENCODER}"
 install_from_split_files "vae" "ace_1.5_vae.safetensors"
 
 echo "[setup] ready: ComfyUI will listen on 0.0.0.0:${COMFY_PORT}"
