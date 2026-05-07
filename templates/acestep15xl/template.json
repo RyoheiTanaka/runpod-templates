@@ -1,0 +1,20 @@
+{
+  "name": "acestep15xl",
+  "description": "ACE-Step 1.5 XL music generation template for ComfyUI on RunPod.",
+  "image": "runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04",
+  "containerDiskInGb": 80,
+  "volumeInGb": 0,
+  "ports": [
+    "8188/http",
+    "22/tcp"
+  ],
+  "env": {
+    "ACESTEP_XL_VARIANT": "all",
+    "ACESTEP_LM": "qwen_1.7b",
+    "RUNPOD_TEMPLATES_REF": "main",
+    "COMFY_PORT": "8188",
+    "HF_HUB_ENABLE_HF_TRANSFER": "1",
+    "HF_TOKEN": "your-huggingface-token"
+  },
+  "startCommand": "bash -c 'RUNPOD_TEMPLATES_REF=\"${RUNPOD_TEMPLATES_REF:-main}\"; curl -fsSL \"https://raw.githubusercontent.com/RyoheiTanaka/runpod-templates/${RUNPOD_TEMPLATES_REF}/templates/acestep15xl/setup.sh\" | bash'"
+}

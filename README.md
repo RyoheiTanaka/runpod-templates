@@ -9,12 +9,14 @@ RunPod で AI 環境を起動するためのテンプレート集です。
 | Name | Path | Use case | UI | Ports |
 |---|---|---|---|---|
 | `wan22` | `templates/wan22/` | Wan2.2 動画生成用 ComfyUI 環境 | ComfyUI | `8188/http`, `22/tcp` |
+| `acestep15xl` | `templates/acestep15xl/` | ACE-Step 1.5 XL 音楽生成用 ComfyUI 環境 | ComfyUI | `8188/http`, `22/tcp` |
 
 ## Usage
 
 各テンプレートの設定、環境変数、Start Command はテンプレートごとの README を参照してください。
 
 - [Wan2.2](templates/wan22/README.md)
+- [ACE-Step 1.5 XL](templates/acestep15xl/README.md)
 
 ## Repository layout
 
@@ -23,6 +25,10 @@ runpod-templates/
   README.md
   templates/
     wan22/
+      README.md
+      setup.sh
+      template.json
+    acestep15xl/
       README.md
       setup.sh
       template.json
