@@ -10,6 +10,7 @@ RunPod で AI 環境を起動するためのテンプレート集です。
 |---|---|---|---|---|
 | `wan22` | `templates/wan22/` | Wan2.2 動画生成用 ComfyUI 環境 | ComfyUI | `8188/http`, `22/tcp` |
 | `acestep15xl` | `templates/acestep15xl/` | ACE-Step 1.5 XL 音楽生成用 ComfyUI 環境 | ComfyUI | `8188/http`, `22/tcp` |
+| `acestep15xl-cuda128` | `templates/acestep15xl/` | ACE-Step 1.5 XL 音楽生成用 ComfyUI 環境。RTX 5090 など CUDA 12.8 が必要な GPU 向け | ComfyUI | `8188/http`, `22/tcp` |
 
 ## Usage
 
@@ -32,6 +33,7 @@ runpod-templates/
       README.md
       setup.sh
       template.json
+      template.cuda128.json
 ```
 
 ## Notes
