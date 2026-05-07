@@ -12,6 +12,7 @@
     "WAN_VARIANT": "t2v_a14b",
     "RUNPOD_TEMPLATES_REF": "main",
     "COMFY_PORT": "8188",
+    "HF_HUB_ENABLE_HF_TRANSFER": "1",
     "HF_TOKEN": "your-huggingface-token"
   },
   "startCommand": "bash -c 'RUNPOD_TEMPLATES_REF=\"${RUNPOD_TEMPLATES_REF:-main}\"; curl -fsSL \"https://raw.githubusercontent.com/RyoheiTanaka/runpod-templates/${RUNPOD_TEMPLATES_REF}/templates/wan22/setup.sh\" | bash'"

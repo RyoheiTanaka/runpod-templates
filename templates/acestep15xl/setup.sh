@@ -38,7 +38,7 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
   libsndfile1
 
 python -m pip install --no-cache-dir \
-  "huggingface_hub[cli]" \
+  huggingface_hub \
   hf_transfer
 
 export HF_HUB_ENABLE_HF_TRANSFER="${HF_HUB_ENABLE_HF_TRANSFER:-1}"
@@ -63,7 +63,7 @@ download_model() {
   fi
 
   echo "[setup] downloading ${include_pattern}"
-  huggingface-cli download Comfy-Org/ace_step_1.5_ComfyUI_files \
+  hf download Comfy-Org/ace_step_1.5_ComfyUI_files \
     --include "${include_pattern}" \
     --local-dir "${MODEL_ROOT}/comfy-files"
 }
