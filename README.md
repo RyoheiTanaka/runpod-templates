@@ -31,7 +31,7 @@ RunPod で AI 環境を起動するためのテンプレート集です。
 
 ## Versioning
 
-公開用の RunPod template は `RUNPOD_TEMPLATES_REF` を release tag に固定します。
+公開用の RunPod template は GHCR image tag を release tag に固定します。
 現在の安定版は `v1.0.0` です。
 
 - `main`: 開発・検証用。最新変更を試す場合のみ Pod 起動時に指定します。
@@ -40,7 +40,7 @@ RunPod で AI 環境を起動するためのテンプレート集です。
 - `v1.x.0`: variant 追加や環境変数追加など、既存利用者を壊さない機能追加。
 - `v2.0.0`: 既定モデル、環境変数名、必要 disk など、既存利用者の挙動が変わる変更。
 
-release tag を切る前に、template JSON、README、RunPod console 側の `RUNPOD_TEMPLATES_REF` が同じ tag を指していることを確認してください。
+release tag を切る前に、template JSON、README、RunPod console 側の container image tag が同じ release tag を指していることを確認してください。
 
 ## Repository layout
 
@@ -63,7 +63,7 @@ runpod-templates/
 ## Notes
 
 - モデルファイルはこの repo には含めません。
-- 公開運用時は Start Command の `RUNPOD_TEMPLATES_REF` を release tag に固定してください。
+- 公開運用時は Container image の tag を release tag に固定してください。
 - 検証後は想定外の GPU 課金を避けるため、test pod を停止または削除してください。
 
 ## License

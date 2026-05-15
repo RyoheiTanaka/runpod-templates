@@ -1,7 +1,7 @@
 {
   "name": "ComfyUI-ACE-Step1.5XL-cuda12.8-FreeCraftLog",
   "description": "ACE-Step 1.5 XL music generation template for ComfyUI on RunPod, using CUDA 12.8 for RTX 5090 and other Blackwell GPUs.",
-  "image": "runpod/pytorch:2.8.0-py3.11-cuda12.8.1-cudnn-devel-ubuntu22.04",
+  "image": "ghcr.io/ryoheitanaka/runpod-templates-acestep15xl:v1.0.0-cuda12.8",
   "containerDiskInGb": 100,
   "volumeInGb": 0,
   "ports": [
@@ -11,10 +11,9 @@
   "env": {
     "ACESTEP_XL_VARIANT": "all",
     "ACESTEP_LM": "all",
-    "RUNPOD_TEMPLATES_REF": "v1.0.0",
     "COMFY_PORT": "8188",
     "HF_HUB_ENABLE_HF_TRANSFER": "1",
     "HF_TOKEN": "your-huggingface-token"
   },
-  "startCommand": "bash -c 'RUNPOD_TEMPLATES_REF=\"${RUNPOD_TEMPLATES_REF:-v1.0.0}\"; curl -fsSL \"https://raw.githubusercontent.com/RyoheiTanaka/runpod-templates/${RUNPOD_TEMPLATES_REF}/templates/acestep15xl/setup.sh\" | bash'"
+  "startCommand": "/opt/runpod/start.sh"
 }
