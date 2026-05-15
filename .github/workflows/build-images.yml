@@ -63,5 +63,3 @@ jobs:
             BASE_IMAGE=${{ matrix.cuda.base }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha,scope=${{ matrix.template.name }}-${{ matrix.cuda.tag }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.template.name }}-${{ matrix.cuda.tag }}
