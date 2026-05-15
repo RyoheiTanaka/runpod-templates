@@ -1,7 +1,7 @@
 {
-  "name": "ComfyUI-Wan2.2-FreeCraftLog",
-  "description": "Wan2.2 video generation template for ComfyUI on RunPod.",
-  "image": "runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04",
+  "name": "ComfyUI-Wan2.2-cuda12.8-FreeCraftLog",
+  "description": "Wan2.2 video generation template for ComfyUI on RunPod, using CUDA 12.8 for newer GPUs.",
+  "image": "runpod/pytorch:2.8.0-py3.11-cuda12.8.1-cudnn-devel-ubuntu22.04",
   "containerDiskInGb": 200,
   "volumeInGb": 0,
   "ports": [
