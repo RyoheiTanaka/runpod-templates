@@ -1,7 +1,7 @@
 {
   "name": "ComfyUI-MiniMaxH3-R2V-cuda128-FreeCraftLog",
   "description": "MiniMax H3 Ref2VA (video + audio) template for ComfyUI on RunPod. Not for use in the EU, the UK, the Republic of Korea, or the USA (MiniMax H3 Community License).",
-  "image": "ghcr.io/ryoheitanaka/runpod-templates-minimax-h3:v2.0.0-cuda12.8",
+  "image": "ghcr.io/ryoheitanaka/runpod-templates-minimax-h3:v2.1.0-cuda12.8",
   "containerDiskInGb": 100,
   "volumeInGb": 0,
   "ports": [

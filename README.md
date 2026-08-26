@@ -37,7 +37,18 @@ MiniMax H3 template は MiniMax H3 Community License の Excluded Territories（
 ## Versioning
 
 公開用の RunPod template は GHCR image tag を release tag に固定します。
-現在の安定版は `v2.0.0` です。
+現在の安定版は `v2.1.0` です。
+
+`v2.1.0`（minimax-h3 のみ変更。wan22 / acestep15xl は v2.0.0 と同じ内容）:
+
+- **Turbo LoRA を既定で取得するようにした。** ワークフロー側で無効にしていても、
+  `LoraLoaderModelOnly` がグラフにある限り ComfyUI は `lora_name` を検証するため、
+  取得しないと公式テンプレート由来のワークフローが生成時に落ちる。
+- **「CUDA 13.0 ホストが必要」の記述を撤回。** forward compatibility が効くため、
+  `cudaVersion: 12.8` の Pod でも cuda13.0 版は動作する（実機確認済み）。
+- ComfyUI の clone を `--depth 1` にし、pip キャッシュを削除（イメージ縮小）。
+
+`v2.0.0` は既存利用者の挙動が変わるため major を上げています。
 
 `v2.0.0` は既存利用者の挙動が変わるため major を上げています。
 

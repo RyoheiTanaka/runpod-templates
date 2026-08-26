@@ -9,7 +9,7 @@ MODEL_ROOT="${WORKSPACE}/models/minimax-h3"
 LOG_DIR="${WORKSPACE}/logs"
 HF_HOME="${HF_HOME:-${WORKSPACE}/.cache/huggingface}"
 HF_REPO="Comfy-Org/MiniMax-H3"
-DOWNLOAD_TURBO_LORA="${H3_DOWNLOAD_TURBO_LORA:-0}"
+DOWNLOAD_TURBO_LORA="${H3_DOWNLOAD_TURBO_LORA:-1}"
 
 export HF_HOME
 export HF_XET_HIGH_PERFORMANCE="${HF_XET_HIGH_PERFORMANCE:-1}"
@@ -94,13 +94,18 @@ download_r2v() {
   install_model "vae" "minimax_h3_video_vae_fp16.safetensors"
   install_model "vae" "minimax_h3_audio_vae_fp32.safetensors"
 
-  # Turbo LoRA はワークフロー側で無効にしているため既定では取得しない（1.96GB）。
-  # 検証したい場合のみ H3_DOWNLOAD_TURBO_LORA=1 を指定する。
+  # Turbo LoRA はワークフロー側では無効にして使うが、既定で取得する（1.96GB / 実測 5.1秒）。
+  # ComfySwitchNode で無効にしていても、LoraLoaderModelOnly がグラフに存在する限り
+  # ComfyUI は lora_name の入力を検証する。公式テンプレート video_minimax_h3_r2v は
+  # このノードを含むため、取得しないと "0 installed options for lora_name" で
+  # 生成時に valid: false になる。起動ログは正常に見えるので発覚が遅い。
+  # 容量を切り詰めたい場合のみ H3_DOWNLOAD_TURBO_LORA=0 を指定する。
   if [ "${DOWNLOAD_TURBO_LORA}" = "1" ]; then
     download_model "loras/minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors"
     install_model "loras" "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors"
   else
-    echo "[start] skip turbo LoRA (set H3_DOWNLOAD_TURBO_LORA=1 to fetch)"
+    echo "[start] skip turbo LoRA (H3_DOWNLOAD_TURBO_LORA=0)"
+    echo "[start] warning: workflows containing LoraLoaderModelOnly will fail validation"
   fi
 }
 

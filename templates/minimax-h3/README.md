@@ -34,7 +34,7 @@ CUDA 12.4 版はありません。H100 80GB HBM3 では **CUDA 12.4 が使えな
 | `ComfyUI-MiniMaxH3-R2V-cuda130-FreeCraftLog` | `...runpod-templates-minimax-h3:latest-cuda13.0` | **推奨。** CUDA 13.0 ホスト向け |
 | `ComfyUI-MiniMaxH3-R2V-cuda128-FreeCraftLog` | `...runpod-templates-minimax-h3:latest-cuda12.8` | CUDA 13.0 が確保できない場合のフォールバック |
 
-**cuda13.0 版を推奨します。** cuda12.8 版では ComfyUI が次の警告を出し、`comfy_kitchen` の
+**cuda13.0 版を使ってください。** cuda12.8 版では ComfyUI が次の警告を出し、`comfy_kitchen` の
 `cuda` / `triton` バックエンドが両方 `disabled` になって `eager` へ fallback します。
 
 ```
@@ -43,11 +43,16 @@ WARNING: You need pytorch with cu130 or higher to use optimized CUDA operations.
 
 このテンプレートが使う diffusion モデルは `int8_convrot` 版で、**毎サンプリングステップで回る本体**です。
 その native パスが cu128 では無効化されるため、生成速度に直接効きます。
+cuda13.0 版では警告が消え、`comfy_kitchen backend cuda` が `disabled: False` になります。
 
-⚠️ **cuda13.0 版は CUDA 13.0 のホストでしか動きません。** CUDA 13.x はメジャーバージョンが上がるため、
-12.8 のドライバでは動作しません。Pod 作成時にホストの CUDA を制約してください（下記）。
+> **ホストの CUDA が 12.8 でも動きます。** NVIDIA の forward compatibility が効くため、
+> cuda13.0 版のイメージは `cudaVersion: 12.8` の Pod で問題なく動作することを実機で確認済みです
+> （H100 80GB / AP-JP-1、本番解像度 345 フレームの生成が完走）。
+> Pod 作成時に CUDA バージョンを制約する必要はありません。
 
-公開 deploy link を出す際は、`latest-cuda13.0` を release tag（例: `v1.1.0-cuda13.0`）に固定してください。
+cuda12.8 版は保険として残していますが、**通常は選ぶ理由がありません。**
+
+公開 deploy link を出す際は、`latest-cuda13.0` を release tag（例: `v2.1.0-cuda13.0`）に固定してください。
 
 共通設定:
 
@@ -72,24 +77,25 @@ Serverless の Endpoint 側です）。Pod 作成のたびに毎回指定して�
 | GPU | `NVIDIA H100 80GB HBM3` |
 | GPU 数 | 1 |
 | システム RAM | 64GB 以上（AP-JP-1 の H100 実機では 2.0TB だった） |
-| `allowedCudaVersions` | cuda13.0 版なら `13.0` / cuda12.8 版なら `12.8`（**`12.4` は H100 で使用不可**） |
+| `allowedCudaVersions` | **指定不要**（`12.8` のホストでも cuda13.0 版は動作します） |
 | `dataCenterIds` | `AP-JP-1` / `AP-IN-1` / `CA-MTL-1` のみ（**地域制約**、上記参照） |
 | Network volume | 使用しない |
 
-### CUDA ホストの指定方法
+`dataCenterIds` だけは地域制約があるため必ず明示してください。
 
-REST v2 API の `CreateGpuConfig` は CUDA 制約を持っています（`POST /v2/pods`）:
+## 実測性能（H100 80GB / AP-JP-1）
 
-| フィールド | 意味 |
-|---|---|
-| `gpu.allowedCudaVersions` | 許可する CUDA を完全一致で指定（例 `["13.0"]`） |
-| `gpu.minCudaVersion` | 下限を指定（例 `"13.0"`）。`allowedCudaVersions` と同時指定は 400 |
+steps 20 / scheduler `beta` / sampler `res_multistep` / 345 フレーム:
 
-`runpodctl` にも RunPod MCP の `create-pod` にもこの項目はありません（MCP tools は API の
-curated projection）。**cuda13.0 版を使うときは REST API か console から作成してください。**
-DC も同様に `dataCenterIds` を必ず明示します（地域制約）。
+| 解像度 | s/it | 1本あたり |
+|---|---|---|
+| 0.4MP（864x480） | 11.58 | 4分22秒 |
+| **0.98MP（1344x768）** | **53.6** | **約19分** |
 
-作成後は `get-pod` の `cudaVersion` を確認し、意図したホストに乗っているか確かめてください。
+0.98MP 時の VRAM は 49.9GB / 81.6GB（31GB の余裕）。
+参考: ローカル RTX 3070（0.4MP / 345f）は 92.3 s/it・32分54秒で、同条件の H100 は **8.0倍**。
+
+Pod 作成から生成可能になるまでは約7分（イメージ pull 約5分 + モデル取得 約95秒 + ComfyUI 起動）。
 
 ## Start Command
 
@@ -106,7 +112,7 @@ DC も同様に `dataCenterIds` を必ず明示します（地域制約）。
 | `OUTPUT_DIR` | `/workspace/outputs` | 生成物の出力先。 |
 | `HF_HOME` | `/workspace/.cache/huggingface` | Hugging Face cache ディレクトリ。 |
 | `HF_XET_HIGH_PERFORMANCE` | `1` | Xet 転送の高速モード。 |
-| `H3_DOWNLOAD_TURBO_LORA` | `0` | `1` で Turbo LoRA（1.96GB）も取得します。既定は取得しません。 |
+| `H3_DOWNLOAD_TURBO_LORA` | `1` | Turbo LoRA（1.96GB）を取得します。`0` で取得しません（下記の注意を参照）。 |
 
 `HF_TOKEN` は不要です。`Comfy-Org/MiniMax-H3` は gated ではないため、ライセンス同意も token も要りません。
 
@@ -141,7 +147,7 @@ Pod 作成時、`sshPublicKey` に公開鍵の**中身**（`ssh-ed25519 AAAA...`
 ## Models
 
 すべて [`Comfy-Org/MiniMax-H3`](https://huggingface.co/Comfy-Org/MiniMax-H3) から取得します
-（既定は Turbo LoRA を除く **42.47 GB**。AP-JP-1 の H100 実機で約 90 秒でした）。
+（既定 **44.43 GB**。AP-JP-1 の H100 実機で約 95 秒でした）。
 
 | ComfyUI の配置先 | ファイル | サイズ |
 |---|---|---|
@@ -149,13 +155,25 @@ Pod 作成時、`sshPublicKey` に公開鍵の**中身**（`ssh-ed25519 AAAA...`
 | `text_encoders/` | `qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors` | 15.69 GB |
 | `vae/` | `minimax_h3_video_vae_fp16.safetensors` | 5.21 GB |
 | `vae/` | `minimax_h3_audio_vae_fp32.safetensors` | 0.61 GB |
-| `loras/` | `minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors` | 1.96 GB（既定では取得しない） |
+| `loras/` | `minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors` | 1.96 GB |
 
 - Text encoder は NVFP4 AWQ 版です。NVFP4 は H100（sm_90）では emulated になりますが、
   TE は生成中1回しか通らないため実質的な影響はありません。
   VRAM/RAM が足りない場合だけ `qwen3vl_32b_minimax_h3_int8_convrot.safetensors`（27.14 GB、合計 55.9 GB）を検討してください。
-- Turbo LoRA は**ワークフロー側で無効**の想定のため、既定では取得しません
-  （もや・低コントラスト・色転びの原因）。検証する場合のみ `H3_DOWNLOAD_TURBO_LORA=1` を指定してください。
+- Turbo LoRA は**ワークフロー側では無効**にして使います（もや・低コントラスト・色転びの原因）。
+  ただし**ファイル自体は既定で取得します。**
+
+  `ComfySwitchNode` で無効にしていても、**`LoraLoaderModelOnly` がグラフに存在する限り
+  ComfyUI は `lora_name` の入力を検証します。** 公式テンプレート `video_minimax_h3_r2v` は
+  このノードを含むため、取得しないと生成時に次で失敗します:
+
+  ```
+  'minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors' is unavailable:
+  the server reports 0 installed options for lora_name
+  ```
+
+  起動ログは正常に見えるため発覚が遅くなります。`H3_DOWNLOAD_TURBO_LORA=0` にする場合は、
+  ワークフローから `LoraLoaderModelOnly` ごと外してください。
 
 ## Recommended workflow settings
 
