@@ -37,7 +37,17 @@ MiniMax H3 template は MiniMax H3 Community License の Excluded Territories（
 ## Versioning
 
 公開用の RunPod template は GHCR image tag を release tag に固定します。
-現在の安定版は `v1.0.0` です。
+現在の安定版は `v2.0.0` です。
+
+`v2.0.0` は既存利用者の挙動が変わるため major を上げています。
+
+- **sshd を起動するようにした。** `CMD` で公式イメージの entrypoint を置き換えているせいで、
+  `PUBLIC_KEY` は届いているのに sshd がおらず、**全テンプレートで SSH が繋がらなかった。**
+- **`--enable-cors-header "*"` を外した。** ブラウザから別オリジンで叩いていた場合は壊れます。
+- `HF_HUB_ENABLE_HF_TRANSFER` を `HF_XET_HIGH_PERFORMANCE` に変更（`hf_transfer` は no-op）。
+
+`v1.0.0` のテンプレートは `v1.0.0-*` の image tag を指しているため、この変更の影響を受けません。
+移行するかどうかは利用者の判断に任せ、既存テンプレートはそのまま残します。
 
 - `main`: 開発・検証用。最新変更を試す場合のみ Pod 起動時に指定します。
 - `v1.0.0`: 初回安定版。公開 deploy link と template JSON の既定値です。

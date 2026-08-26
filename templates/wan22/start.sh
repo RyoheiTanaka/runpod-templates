@@ -11,7 +11,7 @@ LOG_DIR="${WORKSPACE}/logs"
 HF_HOME="${HF_HOME:-${WORKSPACE}/.cache/huggingface}"
 
 export HF_HOME
-export HF_HUB_ENABLE_HF_TRANSFER="${HF_HUB_ENABLE_HF_TRANSFER:-1}"
+export HF_XET_HIGH_PERFORMANCE="${HF_XET_HIGH_PERFORMANCE:-1}"
 
 mkdir -p "${MODEL_ROOT}" "${LOG_DIR}" "${OUTPUT_DIR}"
 exec > >(tee -a "${LOG_DIR}/start_wan22_$(date +%Y%m%d_%H%M%S).log") 2>&1
@@ -26,6 +26,33 @@ if [ "${HF_TOKEN:-}" = "your-huggingface-token" ]; then
   echo "[start] HF_TOKEN is a placeholder, ignoring it"
   unset HF_TOKEN
 fi
+
+# CMD で公式イメージの entrypoint を置き換えているため、PUBLIC_KEY を authorized_keys へ
+# 展開して sshd を起動する処理はこの script が持つ必要がある。
+# exec でプロセスが置き換わるので、必ず末尾の exec より前に実行すること。
+start_sshd() {
+  if [ -z "${PUBLIC_KEY:-}" ]; then
+    echo "[start] PUBLIC_KEY is empty, skip sshd"
+    return
+  fi
+
+  mkdir -p /root/.ssh /run/sshd
+  chmod 700 /root/.ssh
+  # RunPod が渡す PUBLIC_KEY を正とし、再起動のたびに上書きする（追記だと重複が溜まる）
+  printf '%s\n' "${PUBLIC_KEY}" > /root/.ssh/authorized_keys
+  chmod 600 /root/.ssh/authorized_keys
+
+  mkdir -p /etc/ssh/sshd_config.d
+  printf 'PermitRootLogin prohibit-password\nPasswordAuthentication no\n' \
+    > /etc/ssh/sshd_config.d/runpod.conf
+
+  ssh-keygen -A
+  /usr/sbin/sshd
+  echo "[start] sshd started"
+}
+
+# sshd が起動できなくても ComfyUI は動かす
+start_sshd || echo "[start] warning: failed to start sshd"
 
 if [ "${WAN_VARIANT}" = "all" ]; then
   echo "[start] error: WAN_VARIANT=all is intentionally unsupported. Use t2v_a14b, i2v_a14b, or ti2v_5b."
@@ -122,4 +149,4 @@ esac
 
 echo "[start] ready: ComfyUI will listen on 0.0.0.0:${COMFY_PORT}"
 cd "${COMFY_DIR}"
-exec python main.py --listen 0.0.0.0 --port "${COMFY_PORT}" --enable-cors-header "*" --output-directory "${OUTPUT_DIR}"
+exec python main.py --listen 0.0.0.0 --port "${COMFY_PORT}" --output-directory "${OUTPUT_DIR}"

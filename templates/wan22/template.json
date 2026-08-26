@@ -1,7 +1,7 @@
 {
-  "name": "ComfyUI-Wan2.2-FreeCraftLog",
+  "name": "ComfyUI-Wan2.2-v2-FreeCraftLog",
   "description": "Wan2.2 video generation template for ComfyUI on RunPod.",
-  "image": "ghcr.io/ryoheitanaka/runpod-templates-wan22:v1.0.0-cuda12.4",
+  "image": "ghcr.io/ryoheitanaka/runpod-templates-wan22:v2.0.0-cuda12.4",
   "containerDiskInGb": 200,
   "volumeInGb": 0,
   "ports": [
@@ -11,7 +11,7 @@
   "env": {
     "WAN_VARIANT": "t2v_a14b",
     "COMFY_PORT": "8188",
-    "HF_HUB_ENABLE_HF_TRANSFER": "1",
+    "HF_XET_HIGH_PERFORMANCE": "1",
     "HF_TOKEN": "your-huggingface-token"
   },
   "startCommand": "/opt/runpod/start.sh"
