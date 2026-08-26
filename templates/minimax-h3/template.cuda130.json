@@ -1,0 +1,16 @@
+{
+  "name": "ComfyUI-MiniMaxH3-R2V-cuda130-FreeCraftLog",
+  "description": "MiniMax H3 Ref2VA (video + audio) template for ComfyUI on RunPod. Requires a CUDA 13.0 host. Not for use in the EU, the UK, the Republic of Korea, or the USA (MiniMax H3 Community License).",
+  "image": "ghcr.io/ryoheitanaka/runpod-templates-minimax-h3:latest-cuda13.0",
+  "containerDiskInGb": 100,
+  "volumeInGb": 0,
+  "ports": [
+    "8188/http",
+    "22/tcp"
+  ],
+  "env": {
+    "COMFY_PORT": "8188",
+    "HF_XET_HIGH_PERFORMANCE": "1"
+  },
+  "startCommand": "/opt/runpod/start.sh"
+}

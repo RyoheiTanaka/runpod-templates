@@ -10,7 +10,7 @@
   ],
   "env": {
     "COMFY_PORT": "8188",
-    "HF_HUB_ENABLE_HF_TRANSFER": "1"
+    "HF_XET_HIGH_PERFORMANCE": "1"
   },
   "startCommand": "/opt/runpod/start.sh"
 }

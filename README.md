@@ -54,22 +54,33 @@ runpod-templates/
   README.md
   templates/
     wan22/
+      Dockerfile
       README.md
       setup.sh
+      start.sh
       template.json
       template.cuda128.json
     acestep15xl/
+      Dockerfile
       README.md
       setup.sh
+      start.sh
       template.json
       template.cuda128.json
     minimax-h3/
+      Dockerfile
       README.md
-      setup.sh
+      start.sh
       template.cuda128.json
+      template.cuda130.json
 ```
 
 `minimax-h3` に `template.json`（CUDA 12.4 版）はありません。H100 では CUDA 12.4 が使えないためです。
+
+`minimax-h3` には `setup.sh` がありません。ComfyUI をイメージに焼き込んだ（`ac47f8f`）あと、
+Pod の起動処理は `start.sh` だけが担っています。`setup.sh` は Dockerfile からも template からも
+参照されない死にコードだったため削除しました。**wan22 / acestep15xl の `setup.sh` も同様に
+未参照なので、整理する余地があります。**
 
 ## Notes
 
