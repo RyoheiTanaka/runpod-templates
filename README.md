@@ -12,6 +12,7 @@ RunPod で AI 環境を起動するためのテンプレート集です。
 | `ComfyUI-Wan2.2-cuda12.8-FreeCraftLog` | `templates/wan22/` | Wan2.2 動画生成用 ComfyUI 環境。CUDA 12.8 対応 driver の host 向け | ComfyUI | `8188/http`, `22/tcp` |
 | `ComfyUI-ACE-Step1.5XL-FreeCraftLog` | `templates/acestep15xl/` | ACE-Step 1.5 XL 音楽生成用 ComfyUI 環境 | ComfyUI | `8188/http`, `22/tcp` |
 | `ComfyUI-ACE-Step1.5XL-cuda12.8-FreeCraftLog` | `templates/acestep15xl/` | ACE-Step 1.5 XL 音楽生成用 ComfyUI 環境。RTX 5090 など CUDA 12.8 が必要な GPU 向け | ComfyUI | `8188/http`, `22/tcp` |
+| `ComfyUI-MiniMaxH3-R2V-cuda128-FreeCraftLog` | `templates/minimax-h3/` | MiniMax H3 Ref2VA（映像＋音声）用 ComfyUI 環境。H100 など CUDA 12.8 以上の GPU 向け。**地域制約あり** | ComfyUI | `8188/http`, `22/tcp` |
 
 ## Deploy Links
 
@@ -28,6 +29,10 @@ RunPod で AI 環境を起動するためのテンプレート集です。
 
 - [Wan2.2](templates/wan22/README.md)
 - [ACE-Step 1.5 XL](templates/acestep15xl/README.md)
+- [MiniMax H3 (Ref2VA)](templates/minimax-h3/README.md)
+
+MiniMax H3 template は MiniMax H3 Community License の Excluded Territories（EU / 英国 / 韓国 / 米国）で
+使用できません。Pod を起動するデータセンターの選択に注意してください。詳細は template の README を参照してください。
 
 ## Versioning
 
@@ -58,7 +63,13 @@ runpod-templates/
       setup.sh
       template.json
       template.cuda128.json
+    minimax-h3/
+      README.md
+      setup.sh
+      template.cuda128.json
 ```
+
+`minimax-h3` に `template.json`（CUDA 12.4 版）はありません。H100 では CUDA 12.4 が使えないためです。
 
 ## Notes
 

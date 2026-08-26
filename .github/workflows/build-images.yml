@@ -23,11 +23,21 @@ jobs:
             image: runpod-templates-wan22
           - name: acestep15xl
             image: runpod-templates-acestep15xl
+          - name: minimax-h3
+            image: runpod-templates-minimax-h3
         cuda:
           - tag: cuda12.4
             base: runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04
           - tag: cuda12.8
             base: runpod/pytorch:2.8.0-py3.11-cuda12.8.1-cudnn-devel-ubuntu22.04
+        exclude:
+          # H100 80GB HBM3 では CUDA 12.4 が使えないため cuda12.8 版のみ build する
+          - template:
+              name: minimax-h3
+              image: runpod-templates-minimax-h3
+            cuda:
+              tag: cuda12.4
+              base: runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04
 
     steps:
       - name: Checkout
