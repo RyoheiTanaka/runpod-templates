@@ -110,12 +110,14 @@ runpod-templates/
     wan22/
       Dockerfile
       README.md
+      runpod-readme.md
       start.sh
       template.cuda128.json
       template.cuda130.json
     acestep15xl/
       Dockerfile
       README.md
+      runpod-readme.md
       start.sh
       template.cuda128.json
       template.cuda130.json
@@ -128,6 +130,9 @@ runpod-templates/
 ```
 
 `template.json`（CUDA 12.4 版）はどのテンプレートにもありません。`v3.0.0` で CUDA 12.4 を廃止したためです。
+
+`runpod-readme.md` は RunPod console の template README に貼る用の原稿です。console 側は
+API から書き込めない場合があるため、ここを正として手で貼り付けます。
 
 `setup.sh` はどのテンプレートにもありません。ComfyUI をイメージに焼き込んだ（`ac47f8f`）あと、
 Pod の起動処理は `start.sh` だけが担っています。`setup.sh` は Dockerfile からも template からも
