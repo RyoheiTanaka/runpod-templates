@@ -25,19 +25,35 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && mkdir -p /run/sshd \
     && rm -rf /var/lib/apt/lists/*
 
-# ComfyUI の requirements.txt は torch を裸で要求するため、pip がベースイメージの
-# PyTorch を PyPI の既定ビルド（CUDA 12.x）で置き換えうる。CUDA ビルドが変わると壊れるので、
-# ベースイメージに入っている版を constraints で固定してから install する。
+# ComfyUI の requirements.txt は torch / torchvision を裸で要求するため、pip がベースイメージの
+# PyTorch を PyPI の既定ビルドで置き換えうる。CUDA ビルドが変わると壊れるので constraints で固定する。
+#
+# ただし torch だけ固定すると torchvision が PyPI から浮いてペアが崩れ、C++ 拡張が噛み合わずに
+# `RuntimeError: operator torchvision::nms does not exist` で ComfyUI が起動しなくなる。
+# cu130 ベースには torchvision が入っていないため、torch と同じ PyTorch index から先に入れておく。
+#
 # --depth 1 で全履歴の取得を避ける（ComfyUI の .git は数百MB になる）
-RUN python -m pip freeze | grep -E '^(torch|torchvision|torchaudio)==' > /opt/torch-constraints.txt \
+RUN set -eu \
+    && TORCH_CU="$(python -c 'import re, torch; m = re.search(r"\+(cu[0-9]+)", torch.__version__); print(m.group(1) if m else "")')" \
+    && echo "base torch: $(python -c 'import torch; print(torch.__version__)') (index: ${TORCH_CU:-pypi})" \
+    && python -m pip install --upgrade pip \
+    && python -m pip freeze | grep -E '^(torch|torchaudio)==' > /opt/torch-constraints.txt \
     && test -s /opt/torch-constraints.txt \
+    && if ! python -c 'import torchvision' >/dev/null 2>&1; then \
+         if [ -n "${TORCH_CU}" ]; then \
+           python -m pip install torchvision --index-url "https://download.pytorch.org/whl/${TORCH_CU}" -c /opt/torch-constraints.txt; \
+         else \
+           python -m pip install torchvision -c /opt/torch-constraints.txt; \
+         fi; \
+       fi \
+    && python -m pip freeze | grep -E '^(torch|torchvision|torchaudio)==' > /opt/torch-constraints.txt \
     && cat /opt/torch-constraints.txt \
     && git clone --depth 1 --branch "${COMFYUI_REF}" "${COMFYUI_REPO}" "${COMFY_DIR}" \
     && cd "${COMFY_DIR}" \
-    && python -m pip install --upgrade pip \
     && python -m pip install huggingface_hub \
     && python -m pip install -r requirements.txt -c /opt/torch-constraints.txt \
-    && python -c "import torch; print('torch after install:', torch.__version__)" \
+    && python -c 'import torch, torchvision; print("after install:", torch.__version__, torchvision.__version__)' \
+    && python -c 'import torchvision; torchvision.ops.nms' \
     && rm -rf /root/.cache/pip
 
 COPY templates/acestep15xl/start.sh /opt/runpod/start.sh
