@@ -17,7 +17,21 @@ minimax-h3 は `int8_convrot` カーネルのため CUDA 13.0 image を推奨し
 
 ## Deploy Links
 
-下記は `v1.0.0` の公開 template です。**`v3.0.0` の template はまだ登録していません。**
+### v3.0.0（推奨）
+
+| Template | CUDA | RunPod deploy link |
+|---|---|---|
+| `ComfyUI-Wan2.2-cuda12.8-v3-FreeCraftLog` | 12.8 | <https://console.runpod.io/deploy?template=tfcpp13sns&ref=zc2sdxqc> |
+| `ComfyUI-Wan2.2-cuda130-v3-FreeCraftLog` | 13.0 | <https://console.runpod.io/deploy?template=429co6ch6n&ref=zc2sdxqc> |
+| `ComfyUI-ACE-Step1.5XL-cuda12.8-v3-FreeCraftLog` | 12.8 | <https://console.runpod.io/deploy?template=02uvewl5gg&ref=zc2sdxqc> |
+| `ComfyUI-ACE-Step1.5XL-cuda130-v3-FreeCraftLog` | 13.0 | <https://console.runpod.io/deploy?template=lebbkuupd8&ref=zc2sdxqc> |
+
+**CUDA 12.8 のほうを推奨します。** 12.8 image は host に `cuda>=12.8` しか要求しないため、
+12.8 host でも 13.0 host でも起動します。13.0 image は `cuda>=13.0` を要求するので 13.0 host が必要です。
+
+### v1.0.0（据え置き）
+
+CUDA 12.4 版です。`v3.0.0` で 12.4 は廃止しましたが、既存の利用者と公開記事の導線のため残しています。
 
 | Template | RunPod deploy link |
 |---|---|

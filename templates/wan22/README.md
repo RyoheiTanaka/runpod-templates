@@ -22,10 +22,10 @@ GPU による image の出し分けは不要になりました。RTX 3090 / 4090
 
 ## Deploy Links
 
-下記は `v1.0.0` の公開 template です。**`v3.0.0` の template はまだ登録していません。**
-
 | Template | RunPod deploy link |
 |---|---|
+| `ComfyUI-Wan2.2-cuda12.8-v3-FreeCraftLog`（**推奨**） | <https://console.runpod.io/deploy?template=tfcpp13sns&ref=zc2sdxqc> |
+| `ComfyUI-Wan2.2-cuda130-v3-FreeCraftLog` | <https://console.runpod.io/deploy?template=429co6ch6n&ref=zc2sdxqc> |
 | `ComfyUI-Wan2.2-FreeCraftLog`（v1.0.0 / CUDA 12.4） | <https://console.runpod.io/deploy?template=soj5tjnbex&ref=zc2sdxqc> |
 | `ComfyUI-Wan2.2-cuda12.8-FreeCraftLog`（v1.0.0 / CUDA 12.8） | <https://console.runpod.io/deploy?template=x4ckgbo5gt&ref=zc2sdxqc> |
 

@@ -22,10 +22,10 @@ PyTorch 2.5 以上を前提としており、CUDA 12.4 ベースイメージの 
 
 ## Deploy Links
 
-下記は `v1.0.0` の公開 template です。**`v3.0.0` の template はまだ登録していません。**
-
 | Template | RunPod deploy link |
 |---|---|
+| `ComfyUI-ACE-Step1.5XL-cuda12.8-v3-FreeCraftLog`（**推奨**） | <https://console.runpod.io/deploy?template=02uvewl5gg&ref=zc2sdxqc> |
+| `ComfyUI-ACE-Step1.5XL-cuda130-v3-FreeCraftLog` | <https://console.runpod.io/deploy?template=lebbkuupd8&ref=zc2sdxqc> |
 | `ComfyUI-ACE-Step1.5XL-FreeCraftLog`（v1.0.0 / CUDA 12.4） | <https://console.runpod.io/deploy?template=whhlf8rbip&ref=zc2sdxqc> |
 | `ComfyUI-ACE-Step1.5XL-cuda12.8-FreeCraftLog`（v1.0.0 / CUDA 12.8） | <https://console.runpod.io/deploy?template=0obn96ivv6&ref=zc2sdxqc> |
 
