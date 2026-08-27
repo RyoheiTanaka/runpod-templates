@@ -1,8 +1,8 @@
-ARG BASE_IMAGE=runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04
+ARG BASE_IMAGE=runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404
 FROM ${BASE_IMAGE}
 
 ARG COMFYUI_REPO=https://github.com/Comfy-Org/ComfyUI.git
-ARG COMFYUI_REF=v0.19.3
+ARG COMFYUI_REF=v0.32.0
 
 LABEL org.opencontainers.image.source="https://github.com/RyoheiTanaka/runpod-templates"
 
@@ -25,12 +25,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && mkdir -p /run/sshd \
     && rm -rf /var/lib/apt/lists/*
 
-RUN git clone "${COMFYUI_REPO}" "${COMFY_DIR}" \
+# ComfyUI の requirements.txt は torch を裸で要求するため、pip がベースイメージの
+# PyTorch を PyPI の既定ビルド（CUDA 12.x）で置き換えうる。CUDA ビルドが変わると壊れるので、
+# ベースイメージに入っている版を constraints で固定してから install する。
+# --depth 1 で全履歴の取得を避ける（ComfyUI の .git は数百MB になる）
+RUN python -m pip freeze | grep -E '^(torch|torchvision|torchaudio)==' > /opt/torch-constraints.txt \
+    && test -s /opt/torch-constraints.txt \
+    && cat /opt/torch-constraints.txt \
+    && git clone --depth 1 --branch "${COMFYUI_REF}" "${COMFYUI_REPO}" "${COMFY_DIR}" \
     && cd "${COMFY_DIR}" \
-    && git checkout "${COMFYUI_REF}" \
     && python -m pip install --upgrade pip \
     && python -m pip install huggingface_hub \
-    && python -m pip install -r requirements.txt
+    && python -m pip install -r requirements.txt -c /opt/torch-constraints.txt \
+    && python -c "import torch; print('torch after install:', torch.__version__)" \
+    && rm -rf /root/.cache/pip
 
 COPY templates/acestep15xl/start.sh /opt/runpod/start.sh
 RUN chmod +x /opt/runpod/start.sh

@@ -4,34 +4,42 @@ ACE-Step 1.5 XL 用の ComfyUI 環境を RunPod 起動時に自動セットア�
 
 ## RunPod settings
 
-まずは CUDA 12.4 image を使ってください。RunPod host driver との互換性が比較的高く、RTX 3090 / RTX 4090 の起動確認向けです。
-RTX 5090 など Blackwell 世代の GPU では CUDA 12.8 / PyTorch 2.8 image の `ComfyUI-ACE-Step1.5XL-cuda12.8-FreeCraftLog` template を使ってください。
+まずは CUDA 13.0 image を使ってください。RunPod host driver との互換性が最も高く、起動できる host が広いためです。
+
+CUDA 12.8 image は保険です。CUDA 13.0 image が起動しない host に当たった場合に使ってください。
 
 | Template | Container image | Use case |
 |---|---|---|
-| `ComfyUI-ACE-Step1.5XL-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-acestep15xl:v1.0.0-cuda12.4` | RTX 3090 / RTX 4090 など、まず通常検証する場合 |
-| `ComfyUI-ACE-Step1.5XL-cuda12.8-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-acestep15xl:v1.0.0-cuda12.8` | RTX 5090 など CUDA 12.8 対応が必要な GPU |
+| `ComfyUI-ACE-Step1.5XL-cuda130-v3-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-acestep15xl:v3.0.0-cuda13.0` | 推奨。まずはこちら。 |
+| `ComfyUI-ACE-Step1.5XL-cuda12.8-v3-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-acestep15xl:v3.0.0-cuda12.8` | CUDA 13.0 image が起動しない場合の保険。 |
+
+CUDA 12.4 image は `v3.0.0` で廃止しました。ComfyUI `v0.32.0` が要求する `comfy-kitchen` が
+PyTorch 2.5 以上を前提としており、CUDA 12.4 ベースイメージの PyTorch 2.4.0 では ComfyUI が起動しません。
+
+**GPU 世代による image の出し分けは不要になりました。** RTX 3090 / 4090 / 5090 いずれも CUDA 13.0 image を使えます。
 
 ## Deploy Links
 
+下記は `v1.0.0` の公開 template です。**`v3.0.0` の template はまだ登録していません。**
+
 | Template | RunPod deploy link |
 |---|---|
-| `ComfyUI-ACE-Step1.5XL-FreeCraftLog` | <https://console.runpod.io/deploy?template=whhlf8rbip&ref=zc2sdxqc> |
-| `ComfyUI-ACE-Step1.5XL-cuda12.8-FreeCraftLog` | <https://console.runpod.io/deploy?template=0obn96ivv6&ref=zc2sdxqc> |
+| `ComfyUI-ACE-Step1.5XL-FreeCraftLog`（v1.0.0 / CUDA 12.4） | <https://console.runpod.io/deploy?template=whhlf8rbip&ref=zc2sdxqc> |
+| `ComfyUI-ACE-Step1.5XL-cuda12.8-FreeCraftLog`（v1.0.0 / CUDA 12.8） | <https://console.runpod.io/deploy?template=0obn96ivv6&ref=zc2sdxqc> |
 
 | Item | Value |
 |---|---|
-| Container image | `ghcr.io/ryoheitanaka/runpod-templates-acestep15xl:v1.0.0-cuda12.4` |
+| Container image | `ghcr.io/ryoheitanaka/runpod-templates-acestep15xl:v3.0.0-cuda13.0` |
 | Container Disk | `100 GB` |
 | Volume | `0 GB` または未指定 |
 | Ports | `8188/http`, `22/tcp` |
-| Recommended GPU | RTX 3090 以上。20GB+ VRAM 推奨。 |
+| Recommended GPU | RTX 3090 以上。20GB+ VRAM 推奨。CUDA 13.0 image はどの世代でも使えます。 |
 | Start Command | 下記参照 |
 
 ## Start Command
 
 既定では container image 内の `/opt/runpod/start.sh` を実行します。
-template の定定値は `v1.0.0` です。開発中の最新版を試す場合だけ `main` に変更してください。
+template JSON の既定値は `v3.0.0` です。開発中の最新版を試す場合だけ `latest-cuda13.0` に変更してください。
 
 ```bash
 /opt/runpod/start.sh

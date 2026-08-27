@@ -4,21 +4,28 @@ Wan2.2 用の ComfyUI 環境を RunPod 起動時に自動セットアップし�
 
 ## RunPod settings
 
-まずは CUDA 12.4 image の `ComfyUI-Wan2.2-FreeCraftLog` を使ってください。RunPod host driver との互換性が比較的高く、起動確認向けです。
+まずは CUDA 13.0 image を使ってください。RunPod host driver との互換性が最も高く、起動できる host が広いためです。
 
-CUDA 12.8 image を使う場合は、host driver が CUDA 12.8 要件を満たす環境で使ってください。満たさない場合は container 起動前に失敗します。
+CUDA 12.8 image は保険です。CUDA 13.0 image が起動しない host に当たった場合に使ってください。
 
 | Template | Container image | Use case |
 |---|---|---|
-| `ComfyUI-Wan2.2-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-wan22:v1.0.0-cuda12.4` | 安定版。まずはこちらを推奨。 |
-| `ComfyUI-Wan2.2-cuda12.8-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-wan22:v1.0.0-cuda12.8` | CUDA 12.8 対応 driver の host 向け。 |
+| `ComfyUI-Wan2.2-cuda130-v3-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-wan22:v3.0.0-cuda13.0` | 推奨。まずはこちら。 |
+| `ComfyUI-Wan2.2-cuda12.8-v3-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-wan22:v3.0.0-cuda12.8` | CUDA 13.0 image が起動しない場合の保険。 |
+
+CUDA 12.4 image は `v3.0.0` で廃止しました。ComfyUI `v0.32.0` が要求する `comfy-kitchen` が
+PyTorch 2.5 以上を前提としており、CUDA 12.4 ベースイメージの PyTorch 2.4.0 では ComfyUI が起動しません。
+
+GPU による image の出し分けは不要になりました。RTX 3090 / 4090 / 5090 いずれも CUDA 13.0 image を使えます。
 
 ## Deploy Links
 
+下記は `v1.0.0` の公開 template です。**`v3.0.0` の template はまだ登録していません。**
+
 | Template | RunPod deploy link |
 |---|---|
-| `ComfyUI-Wan2.2-FreeCraftLog` | <https://console.runpod.io/deploy?template=soj5tjnbex&ref=zc2sdxqc> |
-| `ComfyUI-Wan2.2-cuda12.8-FreeCraftLog` | <https://console.runpod.io/deploy?template=x4ckgbo5gt&ref=zc2sdxqc> |
+| `ComfyUI-Wan2.2-FreeCraftLog`（v1.0.0 / CUDA 12.4） | <https://console.runpod.io/deploy?template=soj5tjnbex&ref=zc2sdxqc> |
+| `ComfyUI-Wan2.2-cuda12.8-FreeCraftLog`（v1.0.0 / CUDA 12.8） | <https://console.runpod.io/deploy?template=x4ckgbo5gt&ref=zc2sdxqc> |
 
 共通設定:
 
@@ -32,13 +39,13 @@ CUDA 12.8 image を使う場合は、host driver が CUDA 12.8 要件を満た�
 ## Start Command
 
 既定では container image 内の `/opt/runpod/start.sh` を実行します。
-template の既定値は `v1.0.0` です。開発中の最新版を試す場合だけ `main` に変更してください。
+template JSON の既定値は `v3.0.0` です。開発中の最新版を試す場合だけ `latest-cuda13.0` に変更してください。
 
 ```bash
 /opt/runpod/start.sh
 ```
 
-公開 deploy link では再現性を重視し、`v1.0.0-cuda12.4` などの固定 image tag を使います。
+公開 deploy link では再現性を重視し、`v3.0.0-cuda13.0` などの固定 image tag を使います。
 
 ## Environment variables
 
@@ -79,7 +86,16 @@ https://<pod-id>-8188.proxy.runpod.net
 
 Pod が `Running` でも HTTP service の公開には数分かかる場合があります。`Not Ready` が出る場合は、Pod の exposed HTTP ports に `8188/http` が入っていることと、ComfyUI の起動ログが出ていることを確認してから再読み込みしてください。
 
-ComfyUI の cross-site request 保護により RunPod proxy 経由のアクセスが 403 になる場合があるため、この setup script では `--enable-cors-header "*"` を付けて ComfyUI を起動します。
+`v1.x` では RunPod proxy 経由のアクセスが 403 になる事例があり、`--enable-cors-header "*"` を付けて起動していました。
+このオプションは公開範囲を広げるため `v2.0.0` で削除しています。proxy 経由で 403 になる場合は、SSH port forward で
+`localhost:8188` に繋いでください。
+
+```bash
+ssh -N -L 8188:localhost:8188 root@<pod-ip> -p <ssh-port> -i <秘密鍵>
+```
+
+`8188/http` の RunPod proxy URL は認証なしで公開されます。URL を知っていれば誰でも ComfyUI を操作でき、
+`input/` と `output/` も見えます。扱う内容によっては SSH port forward を既定にしてください。
 
 ## Paths
 

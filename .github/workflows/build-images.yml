@@ -25,34 +25,16 @@ jobs:
             image: runpod-templates-acestep15xl
           - name: minimax-h3
             image: runpod-templates-minimax-h3
+        # v3.0.0 で cuda12.4 を廃止した。ComfyUI v0.32.0 が要求する comfy-kitchen 0.2.30 は
+        # PyTorch 2.5 以上を前提としており、cuda12.4 ベースの PyTorch 2.4.0 では import 時に
+        # ValueError で落ちる（logs/wan22-v2-verification.md）。
+        # cu130 を主軸にする。cu130 ベースは NVIDIA_REQUIRE_CUDA による host driver 制約を
+        # 持たないため、cuda12.8 ベースより起動できる host が広い。
         cuda:
-          - tag: cuda12.4
-            base: runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04
-          - tag: cuda12.8
-            base: runpod/pytorch:2.8.0-py3.11-cuda12.8.1-cudnn-devel-ubuntu22.04
           - tag: cuda13.0
             base: runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404
-        exclude:
-          # H100 80GB HBM3 では CUDA 12.4 が使えないため minimax-h3 は cuda12.4 を build しない
-          - template:
-              name: minimax-h3
-              image: runpod-templates-minimax-h3
-            cuda:
-              tag: cuda12.4
-              base: runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04
-          # cuda13.0 は minimax-h3 専用（comfy-kitchen の native カーネルが cu130 を要求するため）
-          - template:
-              name: wan22
-              image: runpod-templates-wan22
-            cuda:
-              tag: cuda13.0
-              base: runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404
-          - template:
-              name: acestep15xl
-              image: runpod-templates-acestep15xl
-            cuda:
-              tag: cuda13.0
-              base: runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404
+          - tag: cuda12.8
+            base: runpod/pytorch:2.8.0-py3.11-cuda12.8.1-cudnn-devel-ubuntu22.04
 
     steps:
       - name: Checkout

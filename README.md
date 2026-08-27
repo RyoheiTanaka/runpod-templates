@@ -6,15 +6,17 @@ RunPod で AI 環境を起動するためのテンプレート集です。
 
 ## Templates
 
+いずれも CUDA 13.0 image を推奨、CUDA 12.8 image を保険として用意しています。
+
 | Name | Path | Use case | UI | Ports |
 |---|---|---|---|---|
-| `ComfyUI-Wan2.2-FreeCraftLog` | `templates/wan22/` | Wan2.2 動画生成用 ComfyUI 環境 | ComfyUI | `8188/http`, `22/tcp` |
-| `ComfyUI-Wan2.2-cuda12.8-FreeCraftLog` | `templates/wan22/` | Wan2.2 動画生成用 ComfyUI 環境。CUDA 12.8 対応 driver の host 向け | ComfyUI | `8188/http`, `22/tcp` |
-| `ComfyUI-ACE-Step1.5XL-FreeCraftLog` | `templates/acestep15xl/` | ACE-Step 1.5 XL 音楽生成用 ComfyUI 環境 | ComfyUI | `8188/http`, `22/tcp` |
-| `ComfyUI-ACE-Step1.5XL-cuda12.8-FreeCraftLog` | `templates/acestep15xl/` | ACE-Step 1.5 XL 音楽生成用 ComfyUI 環境。RTX 5090 など CUDA 12.8 が必要な GPU 向け | ComfyUI | `8188/http`, `22/tcp` |
-| `ComfyUI-MiniMaxH3-R2V-cuda128-FreeCraftLog` | `templates/minimax-h3/` | MiniMax H3 Ref2VA（映像＋音声）用 ComfyUI 環境。H100 など CUDA 12.8 以上の GPU 向け。**地域制約あり** | ComfyUI | `8188/http`, `22/tcp` |
+| `ComfyUI-Wan2.2-cuda130-v3-FreeCraftLog` | `templates/wan22/` | Wan2.2 動画生成用 ComfyUI 環境 | ComfyUI | `8188/http`, `22/tcp` |
+| `ComfyUI-ACE-Step1.5XL-cuda130-v3-FreeCraftLog` | `templates/acestep15xl/` | ACE-Step 1.5 XL 音楽生成用 ComfyUI 環境 | ComfyUI | `8188/http`, `22/tcp` |
+| `ComfyUI-MiniMaxH3-R2V-cuda130-FreeCraftLog` | `templates/minimax-h3/` | MiniMax H3 Ref2VA（映像＋音声）用 ComfyUI 環境。**地域制約あり** | ComfyUI | `8188/http`, `22/tcp` |
 
 ## Deploy Links
+
+下記は `v1.0.0` の公開 template です。**`v3.0.0` の template はまだ登録していません。**
 
 | Template | RunPod deploy link |
 |---|---|
@@ -37,7 +39,24 @@ MiniMax H3 template は MiniMax H3 Community License の Excluded Territories（
 ## Versioning
 
 公開用の RunPod template は GHCR image tag を release tag に固定します。
-現在の安定版は `v2.1.0` です。
+現在の安定版は `v3.0.0` です。
+
+`v3.0.0`（wan22 / acestep15xl のみ変更。minimax-h3 は v2.1.0 と同じ内容）:
+
+- **`v2.0.0` / `v2.1.0` の wan22 / acestep15xl は ComfyUI が起動しません。使わないでください。**
+  `requirements.txt` の `comfy-kitchen>=0.2.8` が浮動指定だったため、`COMFYUI_REF` を固定していても
+  ビルド日によって入る版が変わり、8月ビルドの `comfy-kitchen` が PyTorch 2.4.1 と非互換になりました。
+  import 時に `ValueError: Parameter kernel_size has unsupported type list[int]` で落ちます。
+- **ComfyUI を `v0.19.3` から `v0.32.0` に更新。** `v0.32.0` の `requirements.txt` は
+  `comfy-kitchen` / `comfy-aimdo` を `==` で固定しているため、この浮動指定の問題ごと解消します。
+  13 マイナーバージョン分の差があるため、既存ワークフローがノード API 変更で壊れる可能性があります。
+- **CUDA 12.4 image を廃止。** `comfy-kitchen` が PyTorch 2.5 以上を要求するためです。
+- **ベースイメージを cu130（`runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404`）に統一。**
+  3テンプレートすべてが同じベースになりました。cu130 ベースは `NVIDIA_REQUIRE_CUDA` による
+  host driver 制約を持たないため、cuda12.8 ベースより起動できる host が広くなります。
+- **ベースイメージの PyTorch を constraints で固定。** ComfyUI の `requirements.txt` が torch を
+  裸で要求するため、pip が PyPI の既定ビルドで置き換えうる経路を塞ぎました。
+- **未参照だった `setup.sh` を wan22 / acestep15xl から削除。**
 
 `v2.1.0`（minimax-h3 のみ変更。wan22 / acestep15xl は v2.0.0 と同じ内容）:
 
@@ -47,8 +66,6 @@ MiniMax H3 template は MiniMax H3 Community License の Excluded Territories（
 - **「CUDA 13.0 ホストが必要」の記述を撤回。** forward compatibility が効くため、
   `cudaVersion: 12.8` の Pod でも cuda13.0 版は動作する（実機確認済み）。
 - ComfyUI の clone を `--depth 1` にし、pip キャッシュを削除（イメージ縮小）。
-
-`v2.0.0` は既存利用者の挙動が変わるため major を上げています。
 
 `v2.0.0` は既存利用者の挙動が変わるため major を上げています。
 
@@ -77,17 +94,15 @@ runpod-templates/
     wan22/
       Dockerfile
       README.md
-      setup.sh
       start.sh
-      template.json
       template.cuda128.json
+      template.cuda130.json
     acestep15xl/
       Dockerfile
       README.md
-      setup.sh
       start.sh
-      template.json
       template.cuda128.json
+      template.cuda130.json
     minimax-h3/
       Dockerfile
       README.md
@@ -96,12 +111,11 @@ runpod-templates/
       template.cuda130.json
 ```
 
-`minimax-h3` に `template.json`（CUDA 12.4 版）はありません。H100 では CUDA 12.4 が使えないためです。
+`template.json`（CUDA 12.4 版）はどのテンプレートにもありません。`v3.0.0` で CUDA 12.4 を廃止したためです。
 
-`minimax-h3` には `setup.sh` がありません。ComfyUI をイメージに焼き込んだ（`ac47f8f`）あと、
+`setup.sh` はどのテンプレートにもありません。ComfyUI をイメージに焼き込んだ（`ac47f8f`）あと、
 Pod の起動処理は `start.sh` だけが担っています。`setup.sh` は Dockerfile からも template からも
-参照されない死にコードだったため削除しました。**wan22 / acestep15xl の `setup.sh` も同様に
-未参照なので、整理する余地があります。**
+参照されない死にコードだったため削除しました。
 
 ## Notes
 
