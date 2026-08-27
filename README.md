@@ -110,14 +110,16 @@ runpod-templates/
     wan22/
       Dockerfile
       README.md
-      runpod-readme.md
+      runpod-readme.cuda128.md
+      runpod-readme.cuda130.md
       start.sh
       template.cuda128.json
       template.cuda130.json
     acestep15xl/
       Dockerfile
       README.md
-      runpod-readme.md
+      runpod-readme.cuda128.md
+      runpod-readme.cuda130.md
       start.sh
       template.cuda128.json
       template.cuda130.json
@@ -131,8 +133,12 @@ runpod-templates/
 
 `template.json`（CUDA 12.4 版）はどのテンプレートにもありません。`v3.0.0` で CUDA 12.4 を廃止したためです。
 
-`runpod-readme.md` は RunPod console の template README に貼る用の原稿です。console 側は
-API から書き込めない場合があるため、ここを正として手で貼り付けます。
+`runpod-readme.cuda128.md` / `runpod-readme.cuda130.md` は RunPod console の template README に
+貼る用の原稿です。**console の README は API から書き込めない**（`create-template` / `update-template` の
+`readme` が反映されない）ため、ここを正として手で貼り付けます。
+
+console で template を public にするには、README を既定のひな形から変えることと、
+各ポートにラベルを付けることの両方が必要です。ラベルは `8188/http` を `ComfyUI`、`22/tcp` を `SSH` にします。
 
 `setup.sh` はどのテンプレートにもありません。ComfyUI をイメージに焼き込んだ（`ac47f8f`）あと、
 Pod の起動処理は `start.sh` だけが担っています。`setup.sh` は Dockerfile からも template からも
