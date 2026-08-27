@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404
+ARG BASE_IMAGE=runpod/pytorch:2.8.0-py3.11-cuda12.8.1-cudnn-devel-ubuntu22.04
 FROM ${BASE_IMAGE}
 
 ARG COMFYUI_REPO=https://github.com/Comfy-Org/ComfyUI.git

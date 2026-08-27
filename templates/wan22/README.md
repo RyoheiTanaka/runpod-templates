@@ -4,14 +4,16 @@ Wan2.2 用の ComfyUI 環境を RunPod 起動時に自動セットアップし�
 
 ## RunPod settings
 
-まずは CUDA 13.0 image を使ってください。RunPod host driver との互換性が最も高く、起動できる host が広いためです。
+まずは CUDA 12.8 image を使ってください。起動できる host が最も広いためです。
 
-CUDA 12.8 image は保険です。CUDA 13.0 image が起動しない host に当たった場合に使ってください。
+image は `NVIDIA_REQUIRE_CUDA` で host driver の CUDA version を要求し、満たさない host では
+container 起動前に失敗します。`cuda12.8` image は `cuda>=12.8` を要求するので 12.8 host でも 13.0 host でも
+起動しますが、`cuda13.0` image は `cuda>=13.0` を要求するため 13.0 host でしか起動しません。
 
 | Template | Container image | Use case |
 |---|---|---|
-| `ComfyUI-Wan2.2-cuda130-v3-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-wan22:v3.0.0-cuda13.0` | 推奨。まずはこちら。 |
-| `ComfyUI-Wan2.2-cuda12.8-v3-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-wan22:v3.0.0-cuda12.8` | CUDA 13.0 image が起動しない場合の保険。 |
+| `ComfyUI-Wan2.2-cuda12.8-v3-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-wan22:v3.0.0-cuda12.8` | 推奨。まずはこちら。 |
+| `ComfyUI-Wan2.2-cuda130-v3-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-wan22:v3.0.0-cuda13.0` | 最新 CUDA を使いたい場合。host が CUDA 13.0 対応である必要があります。 |
 
 CUDA 12.4 image は `v3.0.0` で廃止しました。ComfyUI `v0.32.0` が要求する `comfy-kitchen` が
 PyTorch 2.5 以上を前提としており、CUDA 12.4 ベースイメージの PyTorch 2.4.0 では ComfyUI が起動しません。
@@ -39,13 +41,13 @@ GPU による image の出し分けは不要になりました。RTX 3090 / 4090
 ## Start Command
 
 既定では container image 内の `/opt/runpod/start.sh` を実行します。
-template JSON の既定値は `v3.0.0` です。開発中の最新版を試す場合だけ `latest-cuda13.0` に変更してください。
+template JSON の既定値は `v3.0.0` です。開発中の最新版を試す場合だけ `latest-cuda12.8` に変更してください。
 
 ```bash
 /opt/runpod/start.sh
 ```
 
-公開 deploy link では再現性を重視し、`v3.0.0-cuda13.0` などの固定 image tag を使います。
+公開 deploy link では再現性を重視し、`v3.0.0-cuda12.8` などの固定 image tag を使います。
 
 ## Environment variables
 

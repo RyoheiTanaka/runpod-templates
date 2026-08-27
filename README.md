@@ -6,12 +6,13 @@ RunPod で AI 環境を起動するためのテンプレート集です。
 
 ## Templates
 
-いずれも CUDA 13.0 image を推奨、CUDA 12.8 image を保険として用意しています。
+wan22 / acestep15xl は CUDA 12.8 image を推奨、CUDA 13.0 image を選択肢として用意しています。
+minimax-h3 は `int8_convrot` カーネルのため CUDA 13.0 image を推奨します。
 
 | Name | Path | Use case | UI | Ports |
 |---|---|---|---|---|
-| `ComfyUI-Wan2.2-cuda130-v3-FreeCraftLog` | `templates/wan22/` | Wan2.2 動画生成用 ComfyUI 環境 | ComfyUI | `8188/http`, `22/tcp` |
-| `ComfyUI-ACE-Step1.5XL-cuda130-v3-FreeCraftLog` | `templates/acestep15xl/` | ACE-Step 1.5 XL 音楽生成用 ComfyUI 環境 | ComfyUI | `8188/http`, `22/tcp` |
+| `ComfyUI-Wan2.2-cuda12.8-v3-FreeCraftLog` | `templates/wan22/` | Wan2.2 動画生成用 ComfyUI 環境 | ComfyUI | `8188/http`, `22/tcp` |
+| `ComfyUI-ACE-Step1.5XL-cuda12.8-v3-FreeCraftLog` | `templates/acestep15xl/` | ACE-Step 1.5 XL 音楽生成用 ComfyUI 環境 | ComfyUI | `8188/http`, `22/tcp` |
 | `ComfyUI-MiniMaxH3-R2V-cuda130-FreeCraftLog` | `templates/minimax-h3/` | MiniMax H3 Ref2VA（映像＋音声）用 ComfyUI 環境。**地域制約あり** | ComfyUI | `8188/http`, `22/tcp` |
 
 ## Deploy Links
@@ -51,9 +52,10 @@ MiniMax H3 template は MiniMax H3 Community License の Excluded Territories（
   `comfy-kitchen` / `comfy-aimdo` を `==` で固定しているため、この浮動指定の問題ごと解消します。
   13 マイナーバージョン分の差があるため、既存ワークフローがノード API 変更で壊れる可能性があります。
 - **CUDA 12.4 image を廃止。** `comfy-kitchen` が PyTorch 2.5 以上を要求するためです。
-- **ベースイメージを cu130（`runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404`）に統一。**
-  3テンプレートすべてが同じベースになりました。cu130 ベースは `NVIDIA_REQUIRE_CUDA` による
-  host driver 制約を持たないため、cuda12.8 ベースより起動できる host が広くなります。
+- **CUDA 12.8 image を既定にした。** どちらのベースイメージも `NVIDIA_REQUIRE_CUDA` を持っており、
+  `cuda12.8` は host に `cuda>=12.8`、`cuda13.0` は `cuda>=13.0` を要求します。
+  **`cuda12.8` のほうが起動できる host が広い**（12.8 host と 13.0 host の両方）ため、こちらを既定にしています。
+  `cuda13.0` は最新 CUDA を使いたい場合の選択肢です。
 - **ベースイメージの PyTorch を constraints で固定。** ComfyUI の `requirements.txt` が torch を
   裸で要求するため、pip が PyPI の既定ビルドで置き換えうる経路を塞ぎました。
 - **未参照だった `setup.sh` を wan22 / acestep15xl から削除。**
