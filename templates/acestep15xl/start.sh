@@ -144,6 +144,65 @@ done
 download_model "split_files/vae/ace_1.5_vae.safetensors"
 install_from_split_files "vae" "ace_1.5_vae.safetensors"
 
+# ComfyUI と comfy-aimdo はホストの RAM を見ており、コンテナに与えられた上限を見ない。
+# ホストが大きくコンテナの取り分が小さい環境では、2本目のモデルを積んだ時点で pinned memory が
+# コンテナ上限を超え、traceback を出さずに OOM kill される（コンテナごと再起動する）。
+# cgroup から実際の上限を読み、ホスト RAM より明らかに小さければ pinned memory を切る。
+#
+# COMFY_PINNED_MEMORY=auto（既定）/ on（常に使う）/ off（常に切る）で上書きできる。
+container_memory_limit_bytes() {
+  local limit=""
+  if [ -r /sys/fs/cgroup/memory.max ]; then
+    limit="$(cat /sys/fs/cgroup/memory.max 2>/dev/null || true)"
+  elif [ -r /sys/fs/cgroup/memory/memory.limit_in_bytes ]; then
+    limit="$(cat /sys/fs/cgroup/memory/memory.limit_in_bytes 2>/dev/null || true)"
+  fi
+  case "${limit}" in
+    "" | max | *[!0-9]*) return 1 ;;
+  esac
+  echo "${limit}"
+}
+
+host_memory_bytes() {
+  local kb
+  kb="$(awk '/^MemTotal:/ { print $2 }' /proc/meminfo 2>/dev/null || true)"
+  case "${kb}" in
+    "" | *[!0-9]*) return 1 ;;
+  esac
+  echo $((kb * 1024))
+}
+
+COMFY_ARGS=(--listen 0.0.0.0 --port "${COMFY_PORT}" --output-directory "${OUTPUT_DIR}")
+
+pinned_mode="${COMFY_PINNED_MEMORY:-auto}"
+if [ "${pinned_mode}" = "off" ]; then
+  echo "[start] COMFY_PINNED_MEMORY=off, disabling pinned memory"
+  COMFY_ARGS+=(--disable-pinned-memory)
+elif [ "${pinned_mode}" = "auto" ]; then
+  if limit_b="$(container_memory_limit_bytes)" && host_b="$(host_memory_bytes)"; then
+    limit_gb=$((limit_b / 1024 / 1024 / 1024))
+    host_gb=$((host_b / 1024 / 1024 / 1024))
+    echo "[start] memory: container limit ${limit_gb}GB / host ${host_gb}GB"
+    # 上限がホストの 80% 未満なら、ComfyUI が見ている値は実態より大きい
+    if [ "${limit_b}" -lt $((host_b / 10 * 8)) ]; then
+      echo "[start] container limit is well below host RAM, disabling pinned memory"
+      echo "[start] set COMFY_PINNED_MEMORY=on to keep it enabled"
+      COMFY_ARGS+=(--disable-pinned-memory)
+    fi
+  else
+    echo "[start] memory: could not read the container limit, leaving pinned memory as-is"
+  fi
+fi
+
+# 追加の ComfyUI 引数を環境変数から渡せるようにする（--lowvram, --fast-disk, --cache-none など）。
+# 意図的に単語分割する。
+if [ -n "${COMFY_EXTRA_ARGS:-}" ]; then
+  echo "[start] extra args: ${COMFY_EXTRA_ARGS}"
+  # shellcheck disable=SC2206
+  COMFY_ARGS+=(${COMFY_EXTRA_ARGS})
+fi
+
 echo "[start] ready: ComfyUI will listen on 0.0.0.0:${COMFY_PORT}"
+echo "[start] args: ${COMFY_ARGS[*]}"
 cd "${COMFY_DIR}"
-exec python main.py --listen 0.0.0.0 --port "${COMFY_PORT}" --output-directory "${OUTPUT_DIR}"
+exec python main.py "${COMFY_ARGS[@]}"

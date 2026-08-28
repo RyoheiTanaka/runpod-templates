@@ -12,10 +12,10 @@ container 起動前に失敗します。`cuda12.8` image は `cuda>=12.8` を要
 
 | Template | Container image | Use case |
 |---|---|---|
-| `ComfyUI-Wan2.2-cuda12.8-v3-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-wan22:v3.0.0-cuda12.8` | 推奨。まずはこちら。 |
-| `ComfyUI-Wan2.2-cuda130-v3-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-wan22:v3.0.0-cuda13.0` | 最新 CUDA を使いたい場合。host が CUDA 13.0 対応である必要があります。 |
+| `ComfyUI-Wan2.2-cuda12.8-v3-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-wan22:v3.1.0-cuda12.8` | 推奨。まずはこちら。 |
+| `ComfyUI-Wan2.2-cuda130-v3-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-wan22:v3.1.0-cuda13.0` | 最新 CUDA を使いたい場合。host が CUDA 13.0 対応である必要があります。 |
 
-CUDA 12.4 image は `v3.0.0` で廃止しました。ComfyUI `v0.32.0` が要求する `comfy-kitchen` が
+CUDA 12.4 image は `v3.0.0` で廃止しました（`v3.1.0` でも同じ）。ComfyUI `v0.32.0` が要求する `comfy-kitchen` が
 PyTorch 2.5 以上を前提としており、CUDA 12.4 ベースイメージの PyTorch 2.4.0 では ComfyUI が起動しません。
 
 GPU による image の出し分けは不要になりました。RTX 3090 / 4090 / 5090 いずれも CUDA 13.0 image を使えます。
@@ -41,13 +41,13 @@ GPU による image の出し分けは不要になりました。RTX 3090 / 4090
 ## Start Command
 
 既定では container image 内の `/opt/runpod/start.sh` を実行します。
-template JSON の既定値は `v3.0.0` です。開発中の最新版を試す場合だけ `latest-cuda12.8` に変更してください。
+template JSON の既定値は `v3.1.0` です。開発中の最新版を試す場合だけ `latest-cuda12.8` に変更してください。
 
 ```bash
 /opt/runpod/start.sh
 ```
 
-公開 deploy link では再現性を重視し、`v3.0.0-cuda12.8` などの固定 image tag を使います。
+公開 deploy link では再現性を重視し、`v3.1.0-cuda12.8` などの固定 image tag を使います。
 
 ## Environment variables
 
@@ -60,6 +60,8 @@ RunPod で Pod を起動する前に、必要に応じて template の環境変�
 | `WORKSPACE` | `/workspace` | ComfyUI、モデル、cache、ログの基準ディレクトリ。 |
 | `HF_HOME` | `/workspace/.cache/huggingface` | Hugging Face cache ディレクトリ。 |
 | `HF_TOKEN` | `your-huggingface-token` | 推奨。Hugging Face の実 token に置き換えると rate limit を避けやすく、モデル download が速くなる場合があります。 |
+| `COMFY_PINNED_MEMORY` | `auto` | pinned memory の扱い。`auto` はコンテナのメモリ上限を cgroup から読み、ホスト RAM より明らかに小さければ自動で無効化します。`on` で常に有効、`off` で常に無効。 |
+| `COMFY_EXTRA_ARGS` | 未設定 | ComfyUI に渡す追加引数。例: `--lowvram`、`--fast-disk`、`--cache-none`、`--reserve-vram 2`。空白区切りで複数指定できます。 |
 
 `WAN_VARIANT=all` は、必要なモデル容量が大きすぎるため意図的に非対応です。
 `HF_TOKEN=your-huggingface-token` はプレースホルダーとして扱い、setup script 内では token 未設定として無視します。
@@ -76,6 +78,26 @@ RunPod の template UI では dropdown 形式の選択肢を定義できない�
 | `all` | 非対応 | 容量が大きすぎるため、この template では使用しません。 |
 
 未対応値を入力した場合、setup script は明示的に error 終了します。
+
+## メモリ不足でコンテナが落ちる場合
+
+大きなモデルを続けて読み込むと、traceback を出さずにコンテナごと再起動することがあります。
+**VRAM ではなくホスト RAM の見え方が原因です。**
+
+ComfyUI と `comfy-aimdo` はホストの RAM を見ており、コンテナに与えられた上限を見ていません。
+ホストが大きくコンテナの取り分が小さいマシンでは、ホスト RAM を基準に pinned memory を確保するため、
+2本目のモデルを積んだ時点でコンテナの上限を超えて OOM kill されます。
+
+`v3.1.0` からは `start.sh` が cgroup を読んで自動判定し、必要なら `--disable-pinned-memory` を付けます。
+起動ログにこう出ます。
+
+```text
+[start] memory: container limit 32GB / host 252GB
+[start] container limit is well below host RAM, disabling pinned memory
+```
+
+自動判定を上書きしたい場合は `COMFY_PINNED_MEMORY` を `on` / `off` にしてください。
+それでも落ちる場合は `COMFY_EXTRA_ARGS` に `--lowvram` や `--cache-none` を渡して様子を見てください。
 
 ## ComfyUI access
 

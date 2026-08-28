@@ -17,7 +17,7 @@ minimax-h3 は `int8_convrot` カーネルのため CUDA 13.0 image を推奨し
 
 ## Deploy Links
 
-### v3.0.0（推奨）
+### v3（推奨）
 
 | Template | CUDA | RunPod deploy link |
 |---|---|---|
@@ -54,7 +54,17 @@ MiniMax H3 template は MiniMax H3 Community License の Excluded Territories（
 ## Versioning
 
 公開用の RunPod template は GHCR image tag を release tag に固定します。
-現在の安定版は `v3.0.0` です。
+現在の安定版は `v3.1.0` です。
+
+`v3.1.0`（wan22 / acestep15xl のみ変更）:
+
+- **メモリ不足によるコンテナの突然死を自動で回避するようにした。** ComfyUI と `comfy-aimdo` は
+  ホストの RAM を見ておりコンテナの上限を見ないため、ホストが大きくコンテナの取り分が小さいマシンでは
+  2本目のモデルを積んだ時点で pinned memory が上限を超え、traceback なしで OOM kill されていた。
+  `start.sh` が cgroup から実際の上限を読み、ホスト RAM より明らかに小さければ
+  `--disable-pinned-memory` を付ける。`COMFY_PINNED_MEMORY=on|off|auto` で上書きできる。
+- **`COMFY_EXTRA_ARGS` を追加。** `--lowvram` や `--cache-none` などを、イメージを作り直さずに
+  Pod の環境変数から ComfyUI に渡せる。
 
 `v3.0.0`（wan22 / acestep15xl のみ変更。minimax-h3 は v2.1.0 と同じ内容）:
 
