@@ -1,7 +1,14 @@
 {
   "name": "ComfyUI-ACE-Step1.5XL-cuda12.8-v3-FreeCraftLog",
   "description": "ACE-Step 1.5 XL music generation template for ComfyUI on RunPod. Recommended: this image starts on both CUDA 12.8 and CUDA 13.0 hosts.",
-  "image": "ghcr.io/ryoheitanaka/runpod-templates-acestep15xl:v3.1.0-cuda12.8",
+  "image": "ghcr.io/ryoheitanaka/runpod-templates-acestep15xl:v3.2.0-cuda12.8",
+  "allowedCudaVersions": [
+    "12.8",
+    "12.9",
+    "13.0",
+    "13.1",
+    "13.2"
+  ],
   "containerDiskInGb": 100,
   "volumeInGb": 0,
   "ports": [

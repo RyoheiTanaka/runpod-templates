@@ -26,8 +26,14 @@ minimax-h3 は `int8_convrot` カーネルのため CUDA 13.0 image を推奨し
 | `ComfyUI-ACE-Step1.5XL-cuda12.8-v3-FreeCraftLog` | 12.8 | <https://console.runpod.io/deploy?template=02uvewl5gg&ref=zc2sdxqc> |
 | `ComfyUI-ACE-Step1.5XL-cuda130-v3-FreeCraftLog` | 13.0 | <https://console.runpod.io/deploy?template=lebbkuupd8&ref=zc2sdxqc> |
 
-**CUDA 12.8 のほうを推奨します。** 12.8 image は host に `cuda>=12.8` しか要求しないため、
-12.8 host でも 13.0 host でも起動します。13.0 image は `cuda>=13.0` を要求するので 13.0 host が必要です。
+**CUDA 12.8 のほうを推奨します。** 対応する host が広く、イメージも軽いためです。
+
+`v3.2.0` で 12.8 image のベースを runtime 版に差し替えたため、この image は
+`NVIDIA_REQUIRE_CUDA` を持ちません。**要件を満たさない host でも container は起動してしまい、
+実行時に CUDA のエラーになります。** template の `allowedCudaVersions` で `12.8` 以上のみを
+許可することで代替しています。console から自分で template を作る場合は同じ設定が要ります。
+
+13.0 image は従来どおり `cuda>=13.0` を要求するので、13.0 host が必要です。
 
 ### v1.0.0（据え置き）
 
@@ -54,7 +60,20 @@ MiniMax H3 template は MiniMax H3 Community License の Excluded Territories（
 ## Versioning
 
 公開用の RunPod template は GHCR image tag を release tag に固定します。
-現在の安定版は `v3.1.0` です。
+現在の安定版は `v3.2.0` です。
+
+`v3.2.0`（wan22 / acestep15xl のみ変更。minimax-h3 は据え置き）:
+
+- **`cuda12.8` image を軽くした。** ベースを devel から runtime に差し替えた。`devel` は nvcc や
+  ヘッダを含むが ComfyUI は実行時に使わない。圧縮後 **10.10GB → 4.81GB**、Pod 起動は
+  **7分23秒 → 5分01秒**（RTX 4090 実測）。起動時間の 89% はイメージの pull と展開で、
+  モデルのダウンロードではなくそこが律速だった。
+  PyTorch は `2.8.0.dev20250319+cu128` から正式版の `2.8.0+cu128` になる。
+- **`allowedCudaVersions` を template に追加した。** runtime ベースは `NVIDIA_REQUIRE_CUDA` を
+  持たないため、旧ベースが container 起動前に弾いていた host を通してしまう。
+  `12.8` 以上のみを許可して同じ範囲を再現している。
+- **cgroup の「上限なし」で桁の狂った値が出るのを直した。** `max` という文字列は弾いていたが、
+  cgroup v2 は巨大な数値で返すことがあり素通りしていた。判定結果は元から正しく、表示だけの問題。
 
 `v3.1.0`（wan22 / acestep15xl のみ変更）:
 

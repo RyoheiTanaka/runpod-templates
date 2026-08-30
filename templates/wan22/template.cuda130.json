@@ -1,7 +1,7 @@
 {
   "name": "ComfyUI-Wan2.2-cuda130-v3-FreeCraftLog",
   "description": "Wan2.2 video generation template for ComfyUI on RunPod. Requires a CUDA 13.0 host; use the CUDA 12.8 template if the pod fails to start.",
-  "image": "ghcr.io/ryoheitanaka/runpod-templates-wan22:v3.1.0-cuda13.0",
+  "image": "ghcr.io/ryoheitanaka/runpod-templates-wan22:v3.2.0-cuda13.0",
   "containerDiskInGb": 200,
   "volumeInGb": 0,
   "ports": [

@@ -6,16 +6,38 @@ Wan2.2 用の ComfyUI 環境を RunPod 起動時に自動セットアップし�
 
 まずは CUDA 12.8 image を使ってください。起動できる host が最も広いためです。
 
-image は `NVIDIA_REQUIRE_CUDA` で host driver の CUDA version を要求し、満たさない host では
-container 起動前に失敗します。`cuda12.8` image は `cuda>=12.8` を要求するので 12.8 host でも 13.0 host でも
-起動しますが、`cuda13.0` image は `cuda>=13.0` を要求するため 13.0 host でしか起動しません。
+`cuda12.8` image はベースを runtime 版に差し替えており、`NVIDIA_REQUIRE_CUDA` を持ちません。
+旧版は要件を満たさない host で container 起動前に失敗しましたが、この image はそこを通過してしまい、
+実行時に CUDA のエラーになります。**代わりに template の `allowedCudaVersions` で
+`12.8` 以上のみを許可しています。** RunPod console から自分で template を作る場合は、
+同じ設定を忘れないでください。
+
+`cuda13.0` image は従来どおり `NVIDIA_REQUIRE_CUDA` で `cuda>=13.0` を要求するので、
+13.0 host でしか起動しません。
 
 | Template | Container image | Use case |
 |---|---|---|
-| `ComfyUI-Wan2.2-cuda12.8-v3-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-wan22:v3.1.0-cuda12.8` | 推奨。まずはこちら。 |
-| `ComfyUI-Wan2.2-cuda130-v3-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-wan22:v3.1.0-cuda13.0` | 最新 CUDA を使いたい場合。host が CUDA 13.0 対応である必要があります。 |
+| `ComfyUI-Wan2.2-cuda12.8-v3-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-wan22:v3.2.0-cuda12.8` | 推奨。まずはこちら。 |
+| `ComfyUI-Wan2.2-cuda130-v3-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-wan22:v3.2.0-cuda13.0` | 最新 CUDA を使いたい場合。host が CUDA 13.0 対応である必要があります。 |
 
-CUDA 12.4 image は `v3.0.0` で廃止しました（`v3.1.0` でも同じ）。ComfyUI `v0.32.0` が要求する `comfy-kitchen` が
+### v3.2.0 でイメージを軽くしました
+
+`cuda12.8` image のベースを devel から runtime に差し替えました。`devel` は nvcc やヘッダを含みますが、
+ComfyUI は実行時にどれも使いません。
+
+| | v3.1.0 | v3.2.0 |
+|---|---|---|
+| イメージ（圧縮後） | 10.10 GB | 4.81 GB |
+| Pod 起動（RTX 4090 実測） | 7分23秒 | 5分01秒 |
+| PyTorch | `2.8.0.dev20250319+cu128` | `2.8.0+cu128` |
+
+起動時間の内訳は、イメージの pull と展開が 4分27秒（全体の 89%）です。モデルの
+ダウンロードではなくイメージの取得が律速なので、そこを削りました。
+
+サイズは 52% 減りましたが時間は 32% しか減りません。runtime イメージはレイヤ枚数が少なく、
+ダウンロードは並列化できても巨大なレイヤの展開は直列になるためです。
+
+CUDA 12.4 image は `v3.0.0` で廃止しました（`v3.2.0` でも同じ）。ComfyUI `v0.32.0` が要求する `comfy-kitchen` が
 PyTorch 2.5 以上を前提としており、CUDA 12.4 ベースイメージの PyTorch 2.4.0 では ComfyUI が起動しません。
 
 GPU による image の出し分けは不要になりました。RTX 3090 / 4090 / 5090 いずれも CUDA 13.0 image を使えます。
@@ -41,13 +63,13 @@ GPU による image の出し分けは不要になりました。RTX 3090 / 4090
 ## Start Command
 
 既定では container image 内の `/opt/runpod/start.sh` を実行します。
-template JSON の既定値は `v3.1.0` です。開発中の最新版を試す場合だけ `latest-cuda12.8` に変更してください。
+template JSON の既定値は `v3.2.0` です。開発中の最新版を試す場合だけ `latest-cuda12.8` に変更してください。
 
 ```bash
 /opt/runpod/start.sh
 ```
 
-公開 deploy link では再現性を重視し、`v3.1.0-cuda12.8` などの固定 image tag を使います。
+公開 deploy link では再現性を重視し、`v3.2.0-cuda12.8` などの固定 image tag を使います。
 
 ## Environment variables
 
@@ -89,6 +111,13 @@ ComfyUI と `comfy-aimdo` はホストの RAM を見ており、コンテナに�
 2本目のモデルを積んだ時点でコンテナの上限を超えて OOM kill されます。
 
 `v3.1.0` からは `start.sh` が cgroup を読んで自動判定し、必要なら `--disable-pinned-memory` を付けます。
+
+`v3.2.0` では、cgroup が「上限なし」を巨大な数値で返す環境で桁の狂った値を表示していたのを直しました。
+判定結果は元から正しく、表示だけの問題です。上限が無い場合はこう出ます。
+
+```text
+[start] memory: no container limit / host 1511GB
+```
 起動ログにこう出ます。
 
 ```text

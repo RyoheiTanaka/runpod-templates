@@ -18,24 +18,44 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        template:
-          - name: wan22
-            image: runpod-templates-wan22
-          - name: acestep15xl
-            image: runpod-templates-acestep15xl
-          - name: minimax-h3
-            image: runpod-templates-minimax-h3
+        # 組み合わせを明示する。wan22 と acestep15xl の cuda12.8 だけ runtime ベースに
+        # 移したため、テンプレートと CUDA の総当たりでは表せなくなった。
+        #
         # v3.0.0 で cuda12.4 を廃止した。ComfyUI v0.32.0 が要求する comfy-kitchen 0.2.30 は
         # PyTorch 2.5 以上を前提としており、cuda12.4 ベースの PyTorch 2.4.0 では import 時に
         # ValueError で落ちる（logs/wan22-v2-verification.md）。
-        # cuda12.8 を主軸にする。どちらのベースも NVIDIA_REQUIRE_CUDA を持っており、
-        # cuda12.8 は cuda>=12.8、cuda13.0 は cuda>=13.0 を host に要求する。
-        # つまり cuda12.8 のほうが起動できる host が広い（12.8 host と 13.0 host の両方）。
-        # cu130 は最新 CUDA を使いたい場合の選択肢として残す。
-        cuda:
-          - tag: cuda12.8
+        #
+        # cuda12.8 が主軸。cu130 は最新 CUDA を使いたい場合の選択肢として残す。
+        # 旧 devel ベースは NVIDIA_REQUIRE_CUDA を持ち、要件を満たさない host では
+        # コンテナ起動前に失敗した。runtime ベースはそれを持たないので、
+        # 同じ範囲を template JSON の allowedCudaVersions で明示している。
+        include:
+          - name: wan22
+            image: runpod-templates-wan22
+            tag: cuda12.8
+            base: pytorch/pytorch:2.8.0-cuda12.8-cudnn9-runtime
+          - name: wan22
+            image: runpod-templates-wan22
+            tag: cuda13.0
+            base: runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404
+
+          - name: acestep15xl
+            image: runpod-templates-acestep15xl
+            tag: cuda12.8
+            base: pytorch/pytorch:2.8.0-cuda12.8-cudnn9-runtime
+          - name: acestep15xl
+            image: runpod-templates-acestep15xl
+            tag: cuda13.0
+            base: runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404
+
+          # minimax-h3 は private 利用のみ。据え置く。
+          - name: minimax-h3
+            image: runpod-templates-minimax-h3
+            tag: cuda12.8
             base: runpod/pytorch:2.8.0-py3.11-cuda12.8.1-cudnn-devel-ubuntu22.04
-          - tag: cuda13.0
+          - name: minimax-h3
+            image: runpod-templates-minimax-h3
+            tag: cuda13.0
             base: runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404
 
     steps:
@@ -56,19 +76,19 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/ryoheitanaka/${{ matrix.template.image }}
+          images: ghcr.io/ryoheitanaka/${{ matrix.image }}
           tags: |
-            type=raw,value=latest-${{ matrix.cuda.tag }},enable={{is_default_branch}}
-            type=ref,event=tag,suffix=-${{ matrix.cuda.tag }}
-            type=sha,suffix=-${{ matrix.cuda.tag }}
+            type=raw,value=latest-${{ matrix.tag }},enable={{is_default_branch}}
+            type=ref,event=tag,suffix=-${{ matrix.tag }}
+            type=sha,suffix=-${{ matrix.tag }}
 
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: templates/${{ matrix.template.name }}/Dockerfile
+          file: templates/${{ matrix.name }}/Dockerfile
           push: true
           build-args: |
-            BASE_IMAGE=${{ matrix.cuda.base }}
+            BASE_IMAGE=${{ matrix.base }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

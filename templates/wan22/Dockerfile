@@ -1,4 +1,11 @@
-ARG BASE_IMAGE=runpod/pytorch:2.8.0-py3.11-cuda12.8.1-cudnn-devel-ubuntu22.04
+# devel ベースは nvcc・ヘッダ・静的ライブラリを含むが、ComfyUI は実行時にどれも使わない。
+# runtime へ差し替えると圧縮後 10.10GB → 4.81GB、起動 7分23秒 → 5分01秒（RTX 4090 実測）。
+# torch は 2.8.0 のまま。dev スナップショットから正式版に変わる分はむしろ改善。
+#
+# 引き換えに NVIDIA_REQUIRE_CUDA を失う。旧ベースは要件を満たさない host で
+# コンテナ起動前に失敗したが、こちらは実行時エラーになる。
+# template JSON の allowedCudaVersions で同じ範囲を明示して代替する。
+ARG BASE_IMAGE=pytorch/pytorch:2.8.0-cuda12.8-cudnn9-runtime
 FROM ${BASE_IMAGE}
 
 ARG COMFYUI_REPO=https://github.com/Comfy-Org/ComfyUI.git
