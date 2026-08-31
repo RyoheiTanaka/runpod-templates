@@ -55,10 +55,43 @@ GPU による image の出し分けは不要になりました。RTX 3090 / 4090
 
 | Item | Value |
 |---|---|
-| Container Disk | `200 GB` |
+| Container Disk | `100 GB` |
 | Volume | `0 GB` または未指定 |
 | Ports | `8188/http`, `22/tcp` |
 | Start Command | 下記参照 |
+
+### Container Disk を 100 GB にした根拠
+
+`v3.2.1` で `200 GB` から下げました。RTX 4090 の Pod で実測した値は以下です（2026-08-31）。
+
+| 時点 | `df -h /` |
+|---|---|
+| 起動直後（モデル DL 前） | `200G  60K  200G   1%` |
+| `t2v_a14b` の DL 完了後 | `200G   36G  165G  18%` |
+
+**container image は container disk を消費しません。** 展開後のイメージは別枠で、
+container disk が保持するのは `/workspace` 以下の書き込み分だけです。`start.sh` は
+ダウンロードしたファイルを `ln -sfn` で ComfyUI に見せているので、二重保存もありません。
+
+variant ごとのモデル実容量（Hugging Face の実ファイルサイズ、GiB）:
+
+| variant | 内訳 | 合計 |
+|---|---|---|
+| `t2v_a14b` | high 13.31 + low 13.31 + lora×2 2.29 + umt5 6.27 + vae2.1 0.24 | **35.4** |
+| `i2v_a14b` | high 13.31 + low 13.31 + lora×2 2.29 + umt5 6.27 + vae2.1 0.24 | **35.4** |
+| `ti2v_5b` | 5B fp16 9.31 + umt5 6.27 + vae2.2 1.31 | **16.9** |
+
+`start.sh` は既存ファイルがあれば skip するだけで削除しないため、`WAN_VARIANT` を
+切り替えると古いモデルが残ります。`umt5` と `vae2.1` は共有されるので、累積は次のとおりです。
+
+| 使い方 | 累積 |
+|---|---|
+| 1 variant のみ | 35.4 GB |
+| `t2v_a14b` → `i2v_a14b` | 64.3 GB |
+| 3 variant すべて | 74.9 GB |
+
+最大 74.9 GB に出力動画（`/workspace/outputs`）の分を足しても `100 GB` に収まります。
+acestep15xl の template と同じ値なので、説明も揃います。
 
 ## Start Command
 

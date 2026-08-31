@@ -9,7 +9,7 @@
     "13.1",
     "13.2"
   ],
-  "containerDiskInGb": 200,
+  "containerDiskInGb": 100,
   "volumeInGb": 0,
   "ports": [
     "8188/http",
