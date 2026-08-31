@@ -65,9 +65,11 @@ MiniMax H3 template は MiniMax H3 Community License の Excluded Territories（
 `v3.2.0`（wan22 / acestep15xl のみ変更。minimax-h3 は据え置き）:
 
 - **`cuda12.8` image を軽くした。** ベースを devel から runtime に差し替えた。`devel` は nvcc や
-  ヘッダを含むが ComfyUI は実行時に使わない。圧縮後 **10.10GB → 4.81GB**、Pod 起動は
-  **7分23秒 → 5分01秒**（RTX 4090 実測）。起動時間の 89% はイメージの pull と展開で、
-  モデルのダウンロードではなくそこが律速だった。
+  ヘッダを含むが ComfyUI は実行時に使わない。圧縮後 **10.10GB → 4.81GB**（52%減）。
+  起動時間の大半はイメージの pull と展開で、モデルのダウンロードではなくそこが律速。
+  **ただし pull 速度はデータセンターで数倍振れるので、短縮幅を固定値で書かないこと。**
+  同日・同一イメージでも 4分01秒 と 4分27秒 の開きがあった。各テンプレートの README に
+  実測の内訳を載せている。
   PyTorch は `2.8.0.dev20250319+cu128` から正式版の `2.8.0+cu128` になる。
 - **`allowedCudaVersions` を template に追加した。** runtime ベースは `NVIDIA_REQUIRE_CUDA` を
   持たないため、旧ベースが container 起動前に弾いていた host を通してしまう。
