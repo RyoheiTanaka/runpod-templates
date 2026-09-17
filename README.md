@@ -75,6 +75,11 @@ MiniMax H3 template は MiniMax H3 Community License の Excluded Territories（
   **Global Volume 上での初回ダウンロードが通るかは未検証。** アトミックな rename に
   非対応なので、`hf download` が失敗する可能性が残っている。
 - 起動ログに `[start] models: ${MODEL_ROOT}` を追加した。
+- **`MODEL_ROOT` を template JSON の `env` には入れていない。** 入れると値が常に設定済みになり、
+  `WORKSPACE` への追従が止まる。ネットワークボリュームを `/runpod-volume` にマウントして
+  `WORKSPACE` を差し替えている利用者が、モデルだけコンテナディスクに落とすようになってしまう。
+  使いたい人が Pod 起動時に自分で追加する前提とし、代わりに各テンプレートの
+  `runpod-readme.cuda*.md` に説明を置いた。
 - minimax-h3 は image tag を `v2.1.0` のまま据え置いた。**公開テンプレートにはこの変更は
   含まれない。** 必要になった時点で tag を上げる。
 

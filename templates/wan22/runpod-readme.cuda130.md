@@ -47,6 +47,10 @@ ssh -N -L 8188:localhost:8188 root@<pod-ip> -p <ssh-port> -i <your-key>
 
 `HF_TOKEN` is a placeholder and is ignored unless you replace it with a real token.
 
+`MODEL_ROOT` and `LOG_DIR` are unset by default and derived from `WORKSPACE`: models go to `${WORKSPACE}/models/wan22`, logs to `${WORKSPACE}/logs`. Set `MODEL_ROOT` on its own to keep models on separate storage while logs and outputs stay on `WORKSPACE`. That is what you want with a global volume, which bills per operation and is not built for frequent writes: point `MODEL_ROOT` at it and leave everything else on the container disk.
+
+Setting `MODEL_ROOT` stops it from following `WORKSPACE`, so only set it when you want that split.
+
 ### Help
 
 First boot is dominated by the model download, roughly 36GB for the 14B variants. Measured anywhere from under a minute to over 30 minutes depending on Hugging Face throughput, so give it room and watch the log rather than the clock.
