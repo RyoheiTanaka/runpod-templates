@@ -17,8 +17,8 @@ ACE-Step 1.5 XL 用の ComfyUI 環境を RunPod 起動時に自動セットア�
 
 | Template | Container image | Use case |
 |---|---|---|
-| `ComfyUI-ACE-Step1.5XL-cuda12.8-v3-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-acestep15xl:v3.2.0-cuda12.8` | 推奨。まずはこちら。 |
-| `ComfyUI-ACE-Step1.5XL-cuda130-v3-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-acestep15xl:v3.2.0-cuda13.0` | 最新 CUDA を使いたい場合。host が CUDA 13.0 対応である必要があります。 |
+| `ComfyUI-ACE-Step1.5XL-cuda12.8-v3-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-acestep15xl:v3.3.0-cuda12.8` | 推奨。まずはこちら。 |
+| `ComfyUI-ACE-Step1.5XL-cuda130-v3-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-acestep15xl:v3.3.0-cuda13.0` | 最新 CUDA を使いたい場合。host が CUDA 13.0 対応である必要があります。 |
 
 ### v3.2.0 でイメージを軽くしました
 
@@ -67,7 +67,7 @@ PyTorch 2.5 以上を前提としており、CUDA 12.4 ベースイメージの 
 
 | Item | Value |
 |---|---|
-| Container image | `ghcr.io/ryoheitanaka/runpod-templates-acestep15xl:v3.2.0-cuda12.8` |
+| Container image | `ghcr.io/ryoheitanaka/runpod-templates-acestep15xl:v3.3.0-cuda12.8` |
 | Container Disk | `100 GB` |
 | Volume | `0 GB` または未指定 |
 | Ports | `8188/http`, `22/tcp` |
@@ -94,6 +94,8 @@ RunPod で Pod を起動する前に、必要に応じて template の環境変�
 | `COMFY_PORT` | `8188` | ComfyUI の listen port。 |
 | `HF_XET_HIGH_PERFORMANCE` | `1` | Hugging Face download の高速化（Xet）を有効化します。`HF_HUB_ENABLE_HF_TRANSFER` は deprecated で効きません。 |
 | `WORKSPACE` | `/workspace` | ComfyUI、モデル、cache、ログの基準ディレクトリ。 |
+| `MODEL_ROOT` | `/workspace/models/acestep15xl` | モデルの配置先。単独で指定すると、モデルだけを `WORKSPACE` とは別のストレージに置けます。 |
+| `LOG_DIR` | `/workspace/logs` | 起動ログの出力先。 |
 | `HF_HOME` | `/workspace/.cache/huggingface` | Hugging Face cache ディレクトリ。 |
 | `HF_TOKEN` | `your-huggingface-token` | 推奨。Hugging Face の実 token に置き換えると rate limit を避けやすく、モデル download が速くなる場合があります。 |
 | `COMFY_PINNED_MEMORY` | `auto` | pinned memory の扱い。`auto` はコンテナのメモリ上限を cgroup から読み、ホスト RAM より明らかに小さければ自動で無効化します。`on` で常に有効、`off` で常に無効。 |

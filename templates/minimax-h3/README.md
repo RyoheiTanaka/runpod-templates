@@ -109,6 +109,8 @@ Pod 作成から生成可能になるまでは約7分（イメージ pull 約5�
 |---|---|---|
 | `COMFY_PORT` | `8188` | ComfyUI の listen port。 |
 | `WORKSPACE` | `/workspace` | モデル、cache、出力、ログの基準ディレクトリ。 |
+| `MODEL_ROOT` | `/workspace/models/minimax-h3` | モデルの配置先。単独で指定すると、モデルだけを `WORKSPACE` とは別のストレージに置けます。 |
+| `LOG_DIR` | `/workspace/logs` | 起動ログの出力先。 |
 | `OUTPUT_DIR` | `/workspace/outputs` | 生成物の出力先。 |
 | `HF_HOME` | `/workspace/.cache/huggingface` | Hugging Face cache ディレクトリ。 |
 | `HF_XET_HIGH_PERFORMANCE` | `1` | Xet 転送の高速モード。 |
