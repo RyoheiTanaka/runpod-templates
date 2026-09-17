@@ -17,8 +17,8 @@ Wan2.2 用の ComfyUI 環境を RunPod 起動時に自動セットアップし�
 
 | Template | Container image | Use case |
 |---|---|---|
-| `ComfyUI-Wan2.2-cuda12.8-v3-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-wan22:v3.2.0-cuda12.8` | 推奨。まずはこちら。 |
-| `ComfyUI-Wan2.2-cuda130-v3-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-wan22:v3.2.0-cuda13.0` | 最新 CUDA を使いたい場合。host が CUDA 13.0 対応である必要があります。 |
+| `ComfyUI-Wan2.2-cuda12.8-v3-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-wan22:v3.3.0-cuda12.8` | 推奨。まずはこちら。 |
+| `ComfyUI-Wan2.2-cuda130-v3-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-wan22:v3.3.0-cuda13.0` | 最新 CUDA を使いたい場合。host が CUDA 13.0 対応である必要があります。 |
 
 ### v3.2.0 でイメージを軽くしました
 
@@ -115,7 +115,7 @@ template JSON の既定値は `v3.2.0` です。開発中の最新版を試す�
 /opt/runpod/start.sh
 ```
 
-公開 deploy link では再現性を重視し、`v3.2.0-cuda12.8` などの固定 image tag を使います。
+公開 deploy link では再現性を重視し、`v3.3.0-cuda12.8` などの固定 image tag を使います。
 
 ## Environment variables
 
@@ -126,6 +126,8 @@ RunPod で Pod を起動する前に、必要に応じて template の環境変�
 | `WAN_VARIANT` | `t2v_a14b` | ダウンロードするモデル variant。対応値は `t2v_a14b`, `i2v_a14b`, `ti2v_5b`。 |
 | `COMFY_PORT` | `8188` | ComfyUI の listen port。 |
 | `WORKSPACE` | `/workspace` | ComfyUI、モデル、cache、ログの基準ディレクトリ。 |
+| `MODEL_ROOT` | `/workspace/models/wan22` | モデルの配置先。単独で指定すると、モデルだけを `WORKSPACE` とは別のストレージに置けます。 |
+| `LOG_DIR` | `/workspace/logs` | 起動ログの出力先。 |
 | `HF_HOME` | `/workspace/.cache/huggingface` | Hugging Face cache ディレクトリ。 |
 | `HF_TOKEN` | `your-huggingface-token` | 推奨。Hugging Face の実 token に置き換えると rate limit を避けやすく、モデル download が速くなる場合があります。 |
 | `COMFY_PINNED_MEMORY` | `auto` | pinned memory の扱い。`auto` はコンテナのメモリ上限を cgroup から読み、ホスト RAM より明らかに小さければ自動で無効化します。`on` で常に有効、`off` で常に無効。 |

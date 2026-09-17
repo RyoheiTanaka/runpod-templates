@@ -60,7 +60,23 @@ MiniMax H3 template は MiniMax H3 Community License の Excluded Territories（
 ## Versioning
 
 公開用の RunPod template は GHCR image tag を release tag に固定します。
-現在の安定版は `v3.2.0` です。
+現在の安定版は `v3.3.0` です。
+
+`v3.3.0`（3 テンプレートすべて変更。ただし minimax-h3 は image tag 据え置き）:
+
+- **`MODEL_ROOT` と `LOG_DIR` を環境変数で上書きできるようにした。** 置き場所はこれまで
+  すべて `WORKSPACE` から導出していて、この 2 つだけ `:-` のフォールバックが付いていなかった。
+  `WORKSPACE` / `COMFY_DIR` / `OUTPUT_DIR` / `HF_HOME` と同じ流儀に揃えている。
+  **既定値は変えていないので、環境変数を設定しなければ従来と同じパスになる。**
+- 動機は RunPod の Global Volume（2026-09-15 ベータ・Pod 専用）との組み合わせ。
+  Global Volume はオブジェクトストレージが実体で、容量課金に加えて操作回数（IOPS）でも
+  課金され、頻繁な書き込みには非推奨とされている。`WORKSPACE` ごと向けるとログ・生成物・
+  HF cache まで載るため、`MODEL_ROOT` だけを向けられるようにした。
+  **Global Volume 上での初回ダウンロードが通るかは未検証。** アトミックな rename に
+  非対応なので、`hf download` が失敗する可能性が残っている。
+- 起動ログに `[start] models: ${MODEL_ROOT}` を追加した。
+- minimax-h3 は image tag を `v2.1.0` のまま据え置いた。**公開テンプレートにはこの変更は
+  含まれない。** 必要になった時点で tag を上げる。
 
 `v3.2.0`（wan22 / acestep15xl のみ変更。minimax-h3 は据え置き）:
 

@@ -6,8 +6,8 @@ COMFY_PORT="${COMFY_PORT:-8188}"
 WAN_VARIANT="${WAN_VARIANT:-t2v_a14b}"
 COMFY_DIR="${COMFY_DIR:-/opt/ComfyUI}"
 OUTPUT_DIR="${OUTPUT_DIR:-${WORKSPACE}/outputs}"
-MODEL_ROOT="${WORKSPACE}/models/wan22"
-LOG_DIR="${WORKSPACE}/logs"
+MODEL_ROOT="${MODEL_ROOT:-${WORKSPACE}/models/wan22}"
+LOG_DIR="${LOG_DIR:-${WORKSPACE}/logs}"
 HF_HOME="${HF_HOME:-${WORKSPACE}/.cache/huggingface}"
 
 export HF_HOME
@@ -18,6 +18,7 @@ exec > >(tee -a "${LOG_DIR}/start_wan22_$(date +%Y%m%d_%H%M%S).log") 2>&1
 
 echo "[start] start: $(date -Iseconds)"
 echo "[start] workspace: ${WORKSPACE}"
+echo "[start] models: ${MODEL_ROOT}"
 echo "[start] ComfyUI: ${COMFY_DIR}"
 echo "[start] output: ${OUTPUT_DIR}"
 echo "[start] variant: ${WAN_VARIANT}"

@@ -7,8 +7,8 @@ ACESTEP_XL_VARIANT="${ACESTEP_XL_VARIANT:-all}"
 ACESTEP_LM="${ACESTEP_LM:-all}"
 COMFY_DIR="${COMFY_DIR:-/opt/ComfyUI}"
 OUTPUT_DIR="${OUTPUT_DIR:-${WORKSPACE}/outputs}"
-MODEL_ROOT="${WORKSPACE}/models/acestep15xl"
-LOG_DIR="${WORKSPACE}/logs"
+MODEL_ROOT="${MODEL_ROOT:-${WORKSPACE}/models/acestep15xl}"
+LOG_DIR="${LOG_DIR:-${WORKSPACE}/logs}"
 HF_HOME="${HF_HOME:-${WORKSPACE}/.cache/huggingface}"
 
 export HF_HOME
@@ -19,6 +19,7 @@ exec > >(tee -a "${LOG_DIR}/start_acestep15xl_$(date +%Y%m%d_%H%M%S).log") 2>&1
 
 echo "[start] start: $(date -Iseconds)"
 echo "[start] workspace: ${WORKSPACE}"
+echo "[start] models: ${MODEL_ROOT}"
 echo "[start] ComfyUI: ${COMFY_DIR}"
 echo "[start] output: ${OUTPUT_DIR}"
 echo "[start] ACE-Step XL variant: ${ACESTEP_XL_VARIANT}"
