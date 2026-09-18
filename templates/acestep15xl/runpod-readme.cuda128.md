@@ -29,7 +29,9 @@ ssh -N -L 8188:localhost:8188 root@<pod-ip> -p <ssh-port> -i <your-key>
 - `xl_turbo` - distilled, few-step model
 - `all` - all three (default)
 
-`ACESTEP_LM` picks the text encoder: `qwen_0.6b`, `qwen_1.7b`, `qwen_4b`, or `all` (default).
+Both the `qwen_0.6b` and `qwen_4b` text encoders are always downloaded. The official
+ACE-Step 1.5 XL workflows load both through `DualCLIPLoader`, so there is nothing
+to choose here. `ACESTEP_LM` is gone; passing it is ignored with a warning.
 
 `HF_TOKEN` is a placeholder and is ignored unless you replace it with a real token.
 

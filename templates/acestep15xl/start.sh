@@ -4,7 +4,6 @@ set -euo pipefail
 WORKSPACE="${WORKSPACE:-/workspace}"
 COMFY_PORT="${COMFY_PORT:-8188}"
 ACESTEP_XL_VARIANT="${ACESTEP_XL_VARIANT:-all}"
-ACESTEP_LM="${ACESTEP_LM:-all}"
 COMFY_DIR="${COMFY_DIR:-/opt/ComfyUI}"
 OUTPUT_DIR="${OUTPUT_DIR:-${WORKSPACE}/outputs}"
 MODEL_ROOT="${MODEL_ROOT:-${WORKSPACE}/models/acestep15xl}"
@@ -23,7 +22,16 @@ echo "[start] models: ${MODEL_ROOT}"
 echo "[start] ComfyUI: ${COMFY_DIR}"
 echo "[start] output: ${OUTPUT_DIR}"
 echo "[start] ACE-Step XL variant: ${ACESTEP_XL_VARIANT}"
-echo "[start] ACE-Step LM: ${ACESTEP_LM}"
+echo "[start] text encoders: qwen_0.6b, qwen_4b"
+
+# ACESTEP_LM は廃止した。ACE-Step 1.5 XL の公式 workflow は DualCLIPLoader で
+# qwen_0.6b + qwen_4b の2本を読むため、選択式にすると4つの選択肢のうち3つが
+# 動かない構成になっていた。既に Hub から起動している利用者のために、
+# 渡されても落とさず警告だけ出す。
+if [ -n "${ACESTEP_LM:-}" ]; then
+  echo "[start] warning: ACESTEP_LM is no longer used and will be ignored."
+  echo "[start] warning: ACE-Step 1.5 XL workflows always require qwen_0.6b + qwen_4b."
+fi
 
 if [ "${HF_TOKEN:-}" = "your-huggingface-token" ]; then
   echo "[start] HF_TOKEN is a placeholder, ignoring it"
@@ -109,28 +117,10 @@ case "${ACESTEP_XL_VARIANT}" in
     ;;
 esac
 
-case "${ACESTEP_LM}" in
-  qwen_0.6b)
-    TEXT_ENCODERS=("qwen_0.6b_ace15.safetensors")
-    ;;
-  qwen_1.7b)
-    TEXT_ENCODERS=("qwen_1.7b_ace15.safetensors")
-    ;;
-  qwen_4b)
-    TEXT_ENCODERS=("qwen_4b_ace15.safetensors")
-    ;;
-  all)
-    TEXT_ENCODERS=(
-      "qwen_0.6b_ace15.safetensors"
-      "qwen_1.7b_ace15.safetensors"
-      "qwen_4b_ace15.safetensors"
-    )
-    ;;
-  *)
-    echo "[start] error: unsupported ACESTEP_LM=${ACESTEP_LM}. Use qwen_0.6b, qwen_1.7b, qwen_4b, or all."
-    exit 2
-    ;;
-esac
+TEXT_ENCODERS=(
+  "qwen_0.6b_ace15.safetensors"
+  "qwen_4b_ace15.safetensors"
+)
 
 for diffusion_model in "${DIFFUSION_MODELS[@]}"; do
   download_model "split_files/diffusion_models/${diffusion_model}"

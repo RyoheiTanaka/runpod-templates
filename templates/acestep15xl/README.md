@@ -90,7 +90,6 @@ RunPod で Pod を起動する前に、必要に応じて template の環境変�
 | Name | Default | Description |
 |---|---|---|
 | `ACESTEP_XL_VARIANT` | `all` | ダウンロードする diffusion model。対応値は `xl_base`, `xl_sft`, `xl_turbo`, `all`。 |
-| `ACESTEP_LM` | `all` | ダウンロードする text encoder。対応値は `qwen_0.6b`, `qwen_1.7b`, `qwen_4b`, `all`。 |
 | `COMFY_PORT` | `8188` | ComfyUI の listen port。 |
 | `HF_XET_HIGH_PERFORMANCE` | `1` | Hugging Face download の高速化（Xet）を有効化します。`HF_HUB_ENABLE_HF_TRANSFER` は deprecated で効きません。 |
 | `WORKSPACE` | `/workspace` | ComfyUI、モデル、cache、ログの基準ディレクトリ。 |
@@ -103,8 +102,11 @@ RunPod で Pod を起動する前に、必要に応じて template の環境変�
 
 `HF_TOKEN=your-huggingface-token` はプレースホルダーとして扱い、setup script 内では token 未設定として無視します。
 `ACESTEP_XL_VARIANT=all` は XL base / SFT / turbo の 3 model をすべて配置します。
-`ACESTEP_LM=all` は qwen 0.6B / 1.7B / 4B text encoder をすべて配置します。
-未対応値を入力した場合、setup script は明示的に error 終了します。
+text encoder は `qwen_0.6b` と `qwen_4b` の 2 つを常に配置します。
+ACE-Step 1.5 XL の公式 workflow は `DualCLIPLoader` でこの 2 つを読むため、
+選択式にしていません。
+`ACESTEP_XL_VARIANT` に未対応値を入力した場合、setup script は明示的に error 終了します。
+`ACESTEP_LM` は廃止しました。指定しても無視され、警告だけ出ます。
 
 ## メモリ不足でコンテナが落ちる場合
 
