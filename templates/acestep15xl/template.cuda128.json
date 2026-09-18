@@ -17,7 +17,6 @@
   ],
   "env": {
     "ACESTEP_XL_VARIANT": "all",
-    "ACESTEP_LM": "all",
     "COMFY_PORT": "8188",
     "HF_XET_HIGH_PERFORMANCE": "1",
     "HF_TOKEN": "your-huggingface-token",
