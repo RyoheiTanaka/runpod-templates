@@ -18,8 +18,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # 組み合わせを明示する。wan22 と acestep15xl の cuda12.8 だけ runtime ベースに
-        # 移したため、テンプレートと CUDA の総当たりでは表せなくなった。
+        # 組み合わせを明示する。テンプレートと CUDA の総当たりでは表せない。
+        #
+        # wan22 と acestep15xl は base/Dockerfile の事前ビルド済みイメージを FROM する。
+        # ここで渡すのは元の PyTorch イメージではなく、そのベースのタグになる。
+        # ベースを更新したら base-v* を打ち直し、ここと各 Dockerfile の ARG 既定値を上げる。
+        # minimax-h3 は private 利用のみで、まだ自前で全部ビルドしている。
         #
         # v3.0.0 で cuda12.4 を廃止した。ComfyUI v0.32.0 が要求する comfy-kitchen 0.2.30 は
         # PyTorch 2.5 以上を前提としており、cuda12.4 ベースの PyTorch 2.4.0 では import 時に
@@ -33,20 +37,20 @@ jobs:
           - name: wan22
             image: runpod-templates-wan22
             tag: cuda12.8
-            base: pytorch/pytorch:2.8.0-cuda12.8-cudnn9-runtime
+            base: ghcr.io/ryoheitanaka/runpod-comfyui-base:v1-cuda12.8
           - name: wan22
             image: runpod-templates-wan22
             tag: cuda13.0
-            base: runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404
+            base: ghcr.io/ryoheitanaka/runpod-comfyui-base:v1-cuda13.0
 
           - name: acestep15xl
             image: runpod-templates-acestep15xl
             tag: cuda12.8
-            base: pytorch/pytorch:2.8.0-cuda12.8-cudnn9-runtime
+            base: ghcr.io/ryoheitanaka/runpod-comfyui-base:v1-cuda12.8
           - name: acestep15xl
             image: runpod-templates-acestep15xl
             tag: cuda13.0
-            base: runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404
+            base: ghcr.io/ryoheitanaka/runpod-comfyui-base:v1-cuda13.0
 
           # minimax-h3 は private 利用のみ。据え置く。
           - name: minimax-h3
