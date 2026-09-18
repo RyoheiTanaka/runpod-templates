@@ -57,6 +57,12 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/ryoheitanaka/runpod-comfyui-base
+          # 裸の latest を出さない。既定の latest=auto はタグ push で latest を足すが、
+          # このワークフローは cuda12.8 と cuda13.0 を同じ名前に push するため、
+          # latest が「後に終わったジョブの CUDA」になってしまう。
+          # 参照側は必ず -cuda つきのタグをピン留めする。
+          flavor: |
+            latest=false
           tags: |
             type=match,pattern=base-(.*),group=1,suffix=-${{ matrix.tag }}
             type=raw,value=dev-${{ matrix.tag }},enable=${{ github.ref_type != 'tag' }}
