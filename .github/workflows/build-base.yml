@@ -2,7 +2,7 @@ name: Build ComfyUI base image
 
 # 共通ベース（base/Dockerfile）を GHCR に公開する。
 #
-# build-images.yml と分けているのは、意図的にビルド契機を絞るため。
+# テンプレートのビルド（build-<template>.yml）と分けているのは、意図的にビルド契機を絞るため。
 # このイメージのタグは acestep15xl / wan22 / Hub repo の Dockerfile から
 # ピン留めで参照される。main への push のたびに同じタグを push し直すと、
 # 参照側が黙って別の中身を掴むことになる。
@@ -29,7 +29,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # build-images.yml の base と同じ組み合わせを維持する。
+        # build-wan22.yml / build-acestep15xl.yml の base と同じ組み合わせを維持する。
         # cuda12.8 が Hub の既定（Hub は build-args を渡さないので
         # 各 Dockerfile の ARG 既定値がそのまま使われる）。
         include:
