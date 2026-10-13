@@ -1,0 +1,52 @@
+name: Build Wan2.2 image
+
+# wan22 のイメージだけをビルドする。手順は _build-image.yml にある。
+#
+# - main への push: templates/wan22/ かビルド用のワークフローが変わったときだけ
+# - v* タグ: 常にビルドする（タグは全テンプレート共通。GitHub は tag の push に paths を適用しない）
+# - 手動実行: いつでも。ブランチで実行すると sha-<短縮SHA>-<cuda> だけが出る
+#
+# base/Dockerfile の事前ビルド済みイメージを FROM する。ここで渡すのは元の PyTorch イメージではなく、
+# そのベースのタグになる。ベースを更新したら base-v* を打ち直し、ここと Dockerfile の ARG 既定値を上げる。
+#
+# v3.0.0 で cuda12.4 を廃止した。ComfyUI v0.32.0 が要求する comfy-kitchen 0.2.30 は
+# PyTorch 2.5 以上を前提としており、cuda12.4 ベースの PyTorch 2.4.0 では import 時に
+# ValueError で落ちる（logs/wan22-v2-verification.md）。
+#
+# cuda12.8 が主軸。cu130 は最新 CUDA を使いたい場合の選択肢として残す。
+# 旧 devel ベースは NVIDIA_REQUIRE_CUDA を持ち、要件を満たさない host では
+# コンテナ起動前に失敗した。runtime ベースはそれを持たないので、
+# 同じ範囲を template JSON の allowedCudaVersions で明示している。
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+    paths:
+      - "templates/wan22/**"
+      - ".github/workflows/build-wan22.yml"
+      - ".github/workflows/_build-image.yml"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - tag: cuda12.8
+            base: ghcr.io/ryoheitanaka/runpod-comfyui-base:v1-cuda12.8
+          - tag: cuda13.0
+            base: ghcr.io/ryoheitanaka/runpod-comfyui-base:v1-cuda13.0
+    uses: ./.github/workflows/_build-image.yml
+    with:
+      name: wan22
+      image: runpod-templates-wan22
+      tag: ${{ matrix.tag }}
+      base: ${{ matrix.base }}

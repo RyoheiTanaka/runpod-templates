@@ -1,0 +1,75 @@
+name: Build one RunPod image
+
+# テンプレートのイメージを1つビルドして GHCR に push する、呼び出し専用のワークフロー。
+# 契機（いつビルドするか）は build-<template>.yml が持ち、ここは手順だけを持つ。
+#
+# 以前は build-images.yml が全テンプレートを1つの matrix で持っていた。
+# どのテンプレートを触っても全イメージ（7本）がビルドされ、push し直されていたので、
+# テンプレートごとのワークフローに分けた。
+#
+# タグの付け方は分ける前と同じ:
+#   - main への push: latest-<cuda>
+#   - v* タグ: <tag>-<cuda>（タグは全テンプレート共通。タグを打てば全テンプレートがビルドされる）
+#   - すべての契機: sha-<短縮SHA>-<cuda>
+
+on:
+  workflow_call:
+    inputs:
+      name:
+        description: templates/ の下のディレクトリ名
+        required: true
+        type: string
+      image:
+        description: GHCR のイメージ名（ghcr.io/ryoheitanaka/ の後ろ）
+        required: true
+        type: string
+      tag:
+        description: タグの接尾辞（cuda12.8 など）
+        required: true
+        type: string
+      base:
+        description: Dockerfile の BASE_IMAGE に渡すイメージ
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/ryoheitanaka/${{ inputs.image }}
+          tags: |
+            type=raw,value=latest-${{ inputs.tag }},enable={{is_default_branch}}
+            type=ref,event=tag,suffix=-${{ inputs.tag }}
+            type=sha,suffix=-${{ inputs.tag }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: templates/${{ inputs.name }}/Dockerfile
+          push: true
+          build-args: |
+            BASE_IMAGE=${{ inputs.base }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
