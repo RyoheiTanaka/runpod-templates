@@ -52,6 +52,13 @@ jobs:
             tag: cuda13.0
             base: ghcr.io/ryoheitanaka/runpod-comfyui-base:v1-cuda13.0
 
+          # imagegen は cuda12.8 だけ。template が host の CUDA を 12.8 に絞っているので
+          # cuda13.0 のイメージを作っても使う場面が無い（templates/imagegen/README.md）。
+          - name: imagegen
+            image: runpod-templates-imagegen
+            tag: cuda12.8
+            base: ghcr.io/ryoheitanaka/runpod-comfyui-base:v1-cuda12.8
+
           # minimax-h3 は private 利用のみ。据え置く。
           - name: minimax-h3
             image: runpod-templates-minimax-h3

@@ -8,11 +8,13 @@ RunPod で AI 環境を起動するためのテンプレート集です。
 
 wan22 / acestep15xl は CUDA 12.8 image を推奨、CUDA 13.0 image を選択肢として用意しています。
 minimax-h3 は `int8_convrot` カーネルのため CUDA 13.0 image を推奨します。
+imagegen は CUDA 12.8 image だけで、host の CUDA も 12.8 に絞っています（理由は template の README）。
 
 | Name | Path | Use case | UI | Ports |
 |---|---|---|---|---|
 | `ComfyUI-Wan2.2-cuda12.8-v3-FreeCraftLog` | `templates/wan22/` | Wan2.2 動画生成用 ComfyUI 環境 | ComfyUI | `8188/http`, `22/tcp` |
 | `ComfyUI-ACE-Step1.5XL-cuda12.8-v3-FreeCraftLog` | `templates/acestep15xl/` | ACE-Step 1.5 XL 音楽生成用 ComfyUI 環境 | ComfyUI | `8188/http`, `22/tcp` |
+| `ComfyUI-ImageGen-cuda12.8-FreeCraftLog` | `templates/imagegen/` | 静止画生成用 ComfyUI 環境。モデルは URL と SHA256 で指定 | ComfyUI | `8188/http`, `22/tcp` |
 | `ComfyUI-MiniMaxH3-R2V-cuda130-FreeCraftLog` | `templates/minimax-h3/` | MiniMax H3 Ref2VA（映像＋音声）用 ComfyUI 環境。**地域制約あり** | ComfyUI | `8188/http`, `22/tcp` |
 
 ## Deploy Links
@@ -53,6 +55,7 @@ CUDA 12.4 版です。`v3.0.0` で 12.4 は廃止しましたが、既存の利�
 - [Wan2.2](templates/wan22/README.md)
 - [ACE-Step 1.5 XL](templates/acestep15xl/README.md)
 - [MiniMax H3 (Ref2VA)](templates/minimax-h3/README.md)
+- [ImageGen（静止画）](templates/imagegen/README.md)
 
 MiniMax H3 template は MiniMax H3 Community License の Excluded Territories（EU / 英国 / 韓国 / 米国）で
 使用できません。Pod を起動するデータセンターの選択に注意してください。詳細は template の README を参照してください。
@@ -181,7 +184,18 @@ runpod-templates/
       start.sh
       template.cuda128.json
       template.cuda130.json
+    imagegen/
+      Dockerfile
+      README.md
+      runpod-readme.cuda128.md
+      start.sh
+      fetch-model.sh
+      install-custom-node.sh
+      template.cuda128.json
 ```
+
+imagegen だけ `start.sh` 以外のスクリプトを持ちます。モデルの取得（`fetch-model.sh`）を別プロセスにして、
+固まった取得を止めてもコンテナの主プロセスを巻き込まないようにするためです。
 
 `template.json`（CUDA 12.4 版）はどのテンプレートにもありません。`v3.0.0` で CUDA 12.4 を廃止したためです。
 
