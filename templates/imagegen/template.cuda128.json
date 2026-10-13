@@ -1,0 +1,24 @@
+{
+  "name": "ComfyUI-ImageGen-cuda12.8-FreeCraftLog",
+  "description": "ComfyUI for still image generation on RunPod. Models are fetched from URLs you set, verified by SHA256. Host CUDA is limited to 12.8.",
+  "image": "ghcr.io/ryoheitanaka/runpod-templates-imagegen:latest-cuda12.8",
+  "allowedCudaVersions": [
+    "12.8"
+  ],
+  "containerDiskInGb": 50,
+  "volumeInGb": 0,
+  "ports": [
+    "8188/http",
+    "22/tcp"
+  ],
+  "env": {
+    "MODEL_URL": "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors",
+    "MODEL_SHA256": "31e35c80fc4829d14f90153f4c74cd59c90b779f6afe05a74cd6120b893f7e5b",
+    "MODEL_DEST": "checkpoints/sd_xl_base_1.0.safetensors",
+    "CIVITAI_TOKEN": "your-civitai-token",
+    "HF_TOKEN": "your-huggingface-token",
+    "COMFY_PORT": "8188",
+    "COMFY_PINNED_MEMORY": "auto"
+  },
+  "startCommand": "/opt/runpod/start.sh"
+}
