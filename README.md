@@ -27,6 +27,7 @@ imagegen は CUDA 12.8 image だけです。host の CUDA は、実機で確か�
 | `ComfyUI-Wan2.2-cuda130-v3-FreeCraftLog` | 13.0 | <https://console.runpod.io/deploy?template=429co6ch6n&ref=zc2sdxqc> |
 | `ComfyUI-ACE-Step1.5XL-cuda12.8-v3-FreeCraftLog` | 12.8 | <https://console.runpod.io/deploy?template=02uvewl5gg&ref=zc2sdxqc> |
 | `ComfyUI-ACE-Step1.5XL-cuda130-v3-FreeCraftLog` | 13.0 | <https://console.runpod.io/deploy?template=lebbkuupd8&ref=zc2sdxqc> |
+| `ComfyUI-ImageGen-cuda12.8-FreeCraftLog` | 12.8（host は 12.8 / 13.0） | <https://console.runpod.io/deploy?template=yr11a1zp1n&ref=zc2sdxqc> |
 
 **CUDA 12.8 のほうを推奨します。** 対応する host が広く、イメージも軽いためです。
 

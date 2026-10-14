@@ -10,6 +10,12 @@ SDXL / Illustrious / Pony などの checkpoint を、**URL と SHA256 を環境�
 
 `v3.5.0` で追加しました。開発中の最新版を試す場合だけ `latest-cuda12.8` を使ってください。
 
+## Deploy Link
+
+<https://console.runpod.io/deploy?template=yr11a1zp1n&ref=zc2sdxqc>
+
+**Secure Cloud を選んでから** Deploy してください（理由は下の「Secure Cloud を勧める理由」）。
+
 ## できること
 
 - 起動時に GPU を初期化できるかを確かめ、できなければ ComfyUI を起動せずに止まる
