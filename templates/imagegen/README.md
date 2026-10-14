@@ -317,6 +317,20 @@ ssh -N -L 18188:localhost:8188 root@<pod-ip> -p <ssh-port> -i <秘密鍵>
 クライアントの接続先を `http://127.0.0.1:18188` にします。設定の場所はクライアントによります。
 多くの場合 MCP サーバの環境変数（例 `COMFYUI_URL`）で、MCP サーバの設定を読み直すまで反映されません。
 
+### プロキシ経由で 403 になるクライアントがある
+
+RunPod の HTTP プロキシは、Python 標準ライブラリ（`urllib`）の既定の User-Agent（`Python-urllib/3.x`）を
+**403 で弾きます**。同じ URL でも curl やブラウザなら 200 が返ります（2026-10-14 に確認）。
+自作のスクリプトから `https://<pod-id>-8188.proxy.runpod.net` の API を叩く場合は、User-Agent を明示してください。
+
+```python
+opener = urllib.request.build_opener()
+opener.addheaders = [("User-Agent", "my-client/1.0")]
+urllib.request.install_opener(opener)
+```
+
+SSH トンネル（`http://127.0.0.1:<port>`）経由なら、プロキシを通らないのでこの問題は起きません。
+
 ### 一部のツールは接続先の設定を見ない
 
 クライアントによっては、ワークフローの検証のような一部のツールが接続先の設定を見ず、
