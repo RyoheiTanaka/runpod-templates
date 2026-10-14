@@ -6,7 +6,7 @@ Bundled custom nodes: **SaveImageExtended** and **UltimateSDUpscale**, both pinn
 
 ### Getting Started
 
-Deploy on **Secure Cloud**. This template limits the host CUDA version to **12.8**. We hit two Community Cloud RTX 4090 hosts in a row (CUDA 13.0 / driver 580) where `nvidia-smi` saw the GPU but CUDA failed to initialize. Secure Cloud with CUDA 12.8 did not show this. If no host is available, you can widen the CUDA filter under Additional filters at your own risk.
+Deploy on **Secure Cloud**. We hit two Community Cloud RTX 4090 hosts in a row (CUDA 13.0 / driver 580.178.04) where `nvidia-smi` saw the GPU but CUDA failed to initialize. On Secure Cloud, both a CUDA 12.8 host and a CUDA 13.0 host (driver 580.159.04) worked end to end. The template allows host CUDA **12.8 and 13.0**, the versions it was verified on. If no host is available, you can widen the CUDA filter under Additional filters at your own risk.
 
 The start script tests the GPU first. If CUDA cannot be initialized, it stops before downloading anything and logs `[start] halted`. Restarting will not help; delete the pod and deploy again. The GPU bills while a pod is halted.
 

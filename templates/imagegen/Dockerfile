@@ -4,8 +4,8 @@
 # ベースの中身と、そこに何を置いたかの理由は base/Dockerfile を見る。
 # ベースを更新したら base-v* タグを打ち、この FROM を明示的に上げる。
 #
-# CUDA 12.8 のイメージしか作らない。template で host の CUDA を 12.8 に絞っており
-# （README 参照）、13.0 のイメージを用意しても使う場面が無いため。
+# CUDA 12.8 のイメージしか作らない。このイメージは CUDA 13.0 の host でも動くことを実機で確かめており
+# （README 参照）、13.0 用のイメージを別に用意しても得るものが無いため。
 ARG BASE_IMAGE=ghcr.io/ryoheitanaka/runpod-comfyui-base:v1-cuda12.8
 FROM ${BASE_IMAGE}
 

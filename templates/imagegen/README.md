@@ -6,9 +6,9 @@ SDXL / Illustrious / Pony などの checkpoint を、**URL と SHA256 を環境�
 
 | Template | Container image |
 |---|---|
-| `ComfyUI-ImageGen-cuda12.8-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-imagegen:latest-cuda12.8` |
+| `ComfyUI-ImageGen-cuda12.8-FreeCraftLog` | `ghcr.io/ryoheitanaka/runpod-templates-imagegen:v3.5.0-cuda12.8` |
 
-**リリース前のため、image tag はまだ `latest-cuda12.8` です。** 公開時に release tag（例 `v3.5.0-cuda12.8`）へ固定します。
+`v3.5.0` で追加しました。開発中の最新版を試す場合だけ `latest-cuda12.8` を使ってください。
 
 ## できること
 
@@ -23,36 +23,37 @@ SDXL / Illustrious / Pony などの checkpoint を、**URL と SHA256 を環境�
 | Item | Value |
 |---|---|
 | Cloud | **Secure Cloud** |
-| CUDA Versions | **12.8 のみ**（template の `allowedCudaVersions` で設定済み） |
+| CUDA Versions | **12.8 / 13.0**（template の `allowedCudaVersions` で設定済み） |
 | GPU | RTX 4090 など VRAM 16GB 以上（SDXL 系 1024×1024 の場合） |
 | Container Disk | `50 GB` |
 | Volume | `0 GB` または未指定 |
 | Ports | `8188/http`, `22/tcp` |
 | Start Command | `/opt/runpod/start.sh` |
 
-### Secure Cloud と CUDA 12.8 に絞る理由
+### Secure Cloud を勧める理由
 
 **Community Cloud の RTX 4090 で、2台続けて GPU を初期化できない Pod に当たったためです。**
-どちらもホストの CUDA が 13.0（ドライバ 580 系）でした。`nvidia-smi` は GPU を表示するのに、
+どちらもホストの CUDA が 13.0（ドライバ 580.178.04）でした。`nvidia-smi` は GPU を表示するのに、
 ComfyUI の起動時に `RuntimeError: CUDA unknown error` で落ち、コンテナの再起動を繰り返しました。
 PyTorch を通さずに `cuInit` を直接呼んでも `CUDA_ERROR_UNKNOWN` が返ったので、
 イメージ側の PyTorch ではなく、ホストのドライバの段階で失敗しています。
 
-Secure Cloud の RTX 4090 で、ホストの CUDA を 12.8 に限定して作り直したら起動しました（ドライバ 570 系）。
+Secure Cloud では、CUDA 12.8 と 13.0 のどちらのホストでも起動から生成まで通りました。
 
-**CUDA 13.0 のホストがすべて壊れているという意味ではありません。** 観測したのは2台で、
-原因もドライバのバージョンだと特定できていません。分かっているのは
-「この条件に絞ったら当たらなかった」ことだけです。
+| Cloud | GPU | ホストの CUDA / ドライバ | 結果 |
+|---|---|---|---|
+| Community | RTX 4090 ×2台 | 13.0 / 580.178.04 | GPU を初期化できない |
+| Secure | A100 SXM 80GB | 12.8 / 570.172.08 | 生成・アップスケールまで成功 |
+| Secure | RTX 4090 | 13.0 / 580.159.04 | 生成・アップスケールまで成功 |
 
-**代わりに、空いている host はかなり減ります。** 2026-10-13 の夕方（UTC）には、Secure の RTX 4090 は
-CUDA 13.0 の host にしか空きが無く、12.8 に絞ると在庫が 0 でした。同じ時間に 12.8 で空いていたのは
-A100 / H100 / H200 / B200 だけです。在庫が無い場合は、GPU を替えるか、下の「絞り込みを広げる」を参照してください。
+**原因がドライバのバージョンなのか、Community のホスト個別の問題なのかは特定できていません。**
+観測したのは合わせて4台です。CUDA 13.0 そのものが原因ではないことは分かったので、
+CUDA は 12.8 と 13.0 を許可し、Cloud は Secure を勧める形にしています。
 
-Secure の A100 SXM 80GB・CUDA 12.8 では、Pod 作成から ComfyUI の起動まで **3分25秒**でした
-（イメージ取得 約2分、SDXL base 6.6GB の取得 42秒と照合 25秒、Civitai の LoRA 6秒）。
-イメージの取得時間は host のキャッシュで大きく変わるので、目安にとどめてください。
+許可する CUDA を 12.8 と 13.0 に限っているのは、確かめたのがこの2つだけだからです。
+12.8 だけに絞ると在庫がかなり減ります（2026-10-13 には Secure の RTX 4090 で 12.8 の在庫が 0 でした）。
 
-`start.sh` は最初に GPU を初期化してみるので、同じ host に当たった場合は数 GB のモデルを
+`start.sh` は最初に GPU を初期化してみるので、初期化できない host に当たった場合は数 GB のモデルを
 取得する前に止まり、ログにこう出ます。
 
 ```text
@@ -65,13 +66,26 @@ Secure の A100 SXM 80GB・CUDA 12.8 では、Pod 作成から ComfyUI の起動
 **再起動では直りません。Pod を削除して、別の host で作り直してください。**
 止まっている間も GPU の課金は続きます。
 
+### 起動にかかる時間
+
+Pod 作成から ComfyUI の起動までの実測です。イメージの取得時間は host のキャッシュで、
+モデルの取得時間は Hugging Face の混み具合で大きく変わるので、目安にとどめてください。
+
+| GPU | イメージ取得 | SDXL base（6.6GB）取得 + 照合 | 合計 |
+|---|---|---|---|
+| A100 SXM 80GB | 約2分 | 42秒 + 25秒 | 3分25秒 |
+| RTX 4090 | 約3分20秒 | 143秒 + 32秒 | 約6分15秒 |
+
+RTX 4090 で SDXL base 1024×1024・25 steps を1枚生成し、UltimateSDUpscale で 1536×1536 にするまで、
+モデル読み込み済みで約 23 秒でした（初回は約 31 秒）。
+
 ### Pod 作成時の指定方法
 
 template の `allowedCudaVersions` は Pod 作成時に引き継がれます。Cloud の種別は template に
 保存できないので、Pod を作るたびに指定します。
 
 **Console**: Deploy 画面で Secure Cloud を選び、template を選択します。CUDA の絞り込みは
-template から入りますが、**Additional filters → CUDA Versions** で 12.8 だけになっていることを
+template から入りますが、**Additional filters → CUDA Versions** で 12.8 と 13.0 だけになっていることを
 確認してください。自分で template を作る場合は、この設定を template 側に入れてください。
 
 **REST API**（`POST /v2/pods`）:
@@ -94,8 +108,9 @@ template から入りますが、**Additional filters → CUDA Versions** で 12
 
 在庫が無いときは、自分の責任で範囲を広げられます。
 
-- REST API で `gpu.allowedCudaVersions` を `["12.8", "12.9", "13.0"]` などにする
+- REST API で `gpu.allowedCudaVersions` を `["12.8", "12.9", "13.0", "13.2"]` などにする
 - Console の **Additional filters → CUDA Versions** で追加する
+- Community Cloud を使う
 
 広げた結果 GPU の初期化に失敗する host に当たっても、`start.sh` がモデル取得の前に止まります。
 ログを見て、Pod を作り直してください。

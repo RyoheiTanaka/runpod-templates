@@ -8,7 +8,7 @@ RunPod で AI 環境を起動するためのテンプレート集です。
 
 wan22 / acestep15xl は CUDA 12.8 image を推奨、CUDA 13.0 image を選択肢として用意しています。
 minimax-h3 は `int8_convrot` カーネルのため CUDA 13.0 image を推奨します。
-imagegen は CUDA 12.8 image だけで、host の CUDA も 12.8 に絞っています（理由は template の README）。
+imagegen は CUDA 12.8 image だけです。host の CUDA は、実機で確かめた 12.8 と 13.0 に限っています（理由は template の README）。
 
 | Name | Path | Use case | UI | Ports |
 |---|---|---|---|---|
@@ -63,7 +63,26 @@ MiniMax H3 template は MiniMax H3 Community License の Excluded Territories（
 ## Versioning
 
 公開用の RunPod template は GHCR image tag を release tag に固定します。
-現在の安定版は `v3.3.0` です。
+現在の安定版は `v3.5.0` です。
+
+`v3.5.0`（imagegen を追加。wan22 / acestep15xl / minimax-h3 の template は image tag 据え置き）:
+
+- **静止画用の `imagegen` を追加した。** モデルを URL / SHA256 / 置き場所の環境変数で指定して起動時に取得し、
+  SHA256 が合わなければ ComfyUI を起動しない。GPU を初期化できない host では、モデルを取得する前に止まる。
+  詳細は [templates/imagegen/README.md](templates/imagegen/README.md)
+- imagegen の template は host の CUDA を **12.8 と 13.0 に限る**。Secure Cloud の 12.8 host（A100）と
+  13.0 host（RTX 4090）で、起動から生成・アップスケールまで実機で確かめた2つだけを許可している
+- **イメージのビルドをテンプレートごとのワークフローに分けた。** main への push では、変更のあった
+  テンプレートだけがビルドされる。リリースタグは従来どおり全テンプレート共通で、タグを打てば全部ビルドされる
+- ほかのテンプレートの中身は変わっていない。タグを打つと `v3.5.0-*` の image は作られるが、
+  公開中の template は `v3.3.0` / `v3.4.0` / `v2.1.0` のまま指し続ける
+
+`v3.4.0`（acestep15xl のみ変更）:
+
+- **text encoder を常に `qwen_0.6b` + `qwen_4b` の組で入れるようにした。** 公式の ACE-Step 1.5 XL
+  ワークフローはどれも `DualCLIPLoader` でこの2本を読むため、`ACESTEP_LM` で1本だけ選べる作りでは
+  4択のうち3つがワークフローを動かせなかった。`ACESTEP_LM` は廃止し、指定されていても警告を出して無視する
+- wan22 は `v3.3.0`、minimax-h3 は `v2.1.0` のまま据え置いた
 
 `v3.3.0`（3 テンプレートすべて変更。ただし minimax-h3 は image tag 据え置き）:
 

@@ -6,8 +6,8 @@ name: Build ImageGen image
 # - v* タグ: 常にビルドする（タグは全テンプレート共通。GitHub は tag の push に paths を適用しない）
 # - 手動実行: いつでも。ブランチで実行すると sha-<短縮SHA>-<cuda> だけが出る
 #
-# cuda12.8 だけ。template が host の CUDA を 12.8 に絞っているので、
-# cuda13.0 のイメージを作っても使う場面が無い（templates/imagegen/README.md）。
+# cuda12.8 だけ。この image は CUDA 13.0 の host でも動くことを実機で確かめたので、
+# cuda13.0 のイメージを別に作っても得るものが無い（templates/imagegen/README.md）。
 
 on:
   workflow_dispatch:
