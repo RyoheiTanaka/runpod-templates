@@ -1,9 +1,10 @@
 {
   "name": "ComfyUI-ImageGen-cuda12.8-FreeCraftLog",
-  "description": "ComfyUI for still image generation on RunPod. Models are fetched from URLs you set, verified by SHA256. Host CUDA is limited to 12.8.",
-  "image": "ghcr.io/ryoheitanaka/runpod-templates-imagegen:latest-cuda12.8",
+  "description": "ComfyUI for still image generation on RunPod. Models are fetched from URLs you set, verified by SHA256. Host CUDA is limited to 12.8 and 13.0, the versions it was verified on.",
+  "image": "ghcr.io/ryoheitanaka/runpod-templates-imagegen:v3.5.0-cuda12.8",
   "allowedCudaVersions": [
-    "12.8"
+    "12.8",
+    "13.0"
   ],
   "containerDiskInGb": 50,
   "volumeInGb": 0,
