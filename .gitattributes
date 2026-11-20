@@ -1,3 +1,9 @@
 *.sh text eol=lf
 *.md text eol=lf
 *.json text eol=lf
+*.py text eol=lf
+*.yml text eol=lf
+Dockerfile text eol=lf
+Dockerfile.dockerignore text eol=lf
+templates/vllm/sshd_config text eol=lf
+.gitattributes text eol=lf

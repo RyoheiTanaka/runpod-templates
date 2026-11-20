@@ -6,7 +6,7 @@ RunPod で AI 環境を起動するためのテンプレート集です。
 
 ## 開発中
 
-- [vLLM + SSH](templates/vllm/README.md): モデルIDを指定できる推論API用Pod。SSH鍵の設定とsshd起動を含む。イメージのビルド・GPU実機検証・テンプレート登録は未実施。
+- [vLLM + SSH](templates/vllm/README.md): モデルIDを指定できる推論API用Pod。SSH鍵の設定とsshd起動を含む。A40（host CUDA 13.2）でSSH・認証付きチャット・ツール呼び出しのプライベート検証済み。一般公開は未実施。
 
 ## Templates
 

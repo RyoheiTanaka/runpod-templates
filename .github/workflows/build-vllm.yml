@@ -1,13 +1,18 @@
 name: Build vLLM SSH image
 
-# Verification branches publish immutable sha tags; main is not changed by this test.
+# Build runtime changes on main; release tags and manual runs also publish images.
 on:
   workflow_dispatch:
   push:
     branches:
-      - test/vllm-ssh-20261120
+      - main
+    tags:
+      - 'v*'
     paths:
-      - templates/vllm/**
+      - templates/vllm/Dockerfile
+      - templates/vllm/Dockerfile.dockerignore
+      - templates/vllm/start.py
+      - templates/vllm/sshd_config
       - .github/workflows/build-vllm.yml
       - .github/workflows/_build-image.yml
 

@@ -1,9 +1,14 @@
 # vLLM with SSH tunneling
 
-**Draft — not built, deployed, or GPU-verified yet.** The image reference in
-`template.json` is the intended build output, not an existing published image.
-Before public deployment, build and test it, then replace the draft image reference
-with an immutable release tag or digest. No RunPod template has been registered.
+**Private Pod smoke test passed on 2026-11-20:** A40, host CUDA 13.2,
+Qwen/Qwen3-8B, SSH authentication and forwarding, authenticated chat, and auto
+tool-call response. No public RunPod template or Hub listing has been published.
+Other models, OpenCode file creation with this image, and cache reuse after a
+stop/start remain unverified.
+
+The verified image is pinned in `template.json` by digest. It was built from
+commit `ad5240a995d21145e335647681464fd333823b26`. Set your own API key and
+SSH credentials before deployment; the example API-key placeholder is rejected.
 
 Run an OpenAI-compatible vLLM API on a Pod and connect from a local coding agent
 through SSH. OpenSSH is installed in the image; the entrypoint configures keys,
@@ -11,11 +16,20 @@ starts sshd, and starts vLLM. No package installation is needed at Pod startup.
 
 The base is `vllm/vllm-openai:v0.34.0`. It is separate from this repository's
 ComfyUI base image. Upstream's v0.34.0 Dockerfile defaults to CUDA 13.0.3; GPU,
-driver, and model compatibility must be verified before advertising supported
+driver, and model compatibility for other configurations must be verified before advertising supported
 hardware. CUDA forward compatibility, if needed, is an upstream option and is
-not automatically enabled here. The draft template conservatively selects host
-CUDA 13.0 only; this is a provisioning guard, not a claim of GPU verification.
+not automatically enabled here. The template conservatively selects host
+CUDA 13.2 only, matching the A40 private Pod verification.
 Expand that selection only after testing additional host configurations.
+
+## Use with OpenCode
+
+Follow the [Japanese Windows/PowerShell walkthrough](opencode-guide.ja.md), from
+Pod deployment and explicit storage selection through SSH forwarding, API checks,
+and creating a local ToDo file. The [configuration example](examples/opencode.json)
+uses an environment variable for the key and declares tool support explicitly.
+The example passes the official OpenCode configuration schema; end-to-end file
+creation with this image is still pending a user test.
 
 ## Configure a Pod
 
@@ -87,10 +101,19 @@ default; evaluate the model before opting into `--trust-remote-code`.
 
 ## Disk sizes and persistence
 
-The draft template suggests **Container Disk 30 GB** and **Volume Disk 50 GB**.
-These are editable defaults, not requirements or measurements for all models.
-They are RunPod provisioning settings (`containerDiskInGb`, `volumeInGb`), not
+The template defaults to **Container Disk 30 GB** and **Volume Disk 0 GB**.
+Persistent storage is opt-in. Without a volume, the default model cache under
+`/workspace` is part of the ephemeral container filesystem and must be downloaded
+again after a stop/restart. For repeated use, explicitly choose a sufficiently
+large Volume Disk (for example 50 GB); it continues billing while the Pod is stopped.
+These are editable provisioning settings (`containerDiskInGb`, `volumeInGb`), not
 environment variables that a startup script can use to grow a disk.
+
+The completed private smoke test used an explicitly provisioned 50 GB Volume Disk.
+The new container-only default has not yet been tested on a GPU. Storage selection
+does not change the entrypoint or require rebuilding the image. Already registered
+RunPod templates do not automatically inherit this file's updated default; check
+the deployment form before creating a Pod.
 
 | Storage | Purpose in this template | Persistence |
 | --- | --- | --- |
@@ -133,20 +156,20 @@ From the repository root (Python 3.10+):
 python -m unittest discover -s templates/vllm -p 'test_*.py' -v
 ```
 
-The tests run without a GPU, SSH daemon, network, or model download. They cover
+The unit tests run without a GPU, SSH daemon, network, or model download. They cover
 configuration, key synchronization with mocked validation, and service-failure
 cleanup. They are not a substitute for a Linux image build or an actual SSH/GPU test.
 
-Build manually when ready (downloads dependencies; not performed as part of
-preparing this draft):
+To rebuild locally (downloads dependencies):
 
 ```bash
 docker build -f templates/vllm/Dockerfile -t runpod-vllm-ssh:dev .
 ```
 
-The `Build vLLM SSH image` workflow is **manual-only** and publishes to GHCR when
-explicitly run. Its base is pinned to vLLM 0.34.0. Do not claim the intended GHCR
-tag exists until the build succeeds.
+The `Build vLLM SSH image` workflow uses the shared build workflow and publishes to GHCR on main,
+release tags, or manual invocation. Documentation-only pushes do not rebuild the
+image. Its base is pinned to vLLM 0.34.0. Deployment stays pinned to the verified
+digest until a replacement image has been tested.
 
 Before publication, verify: image build and CUDA/driver compatibility; key
 injection; direct SSH and local forwarding; absence of public API access; `/v1/models`
