@@ -1,0 +1,20 @@
+{
+  "name": "vLLM-SSH-FreeCraftLog-DRAFT",
+  "description": "Draft: vLLM with SSH tunneling, configurable model ID and model cache. Image build and GPU verification are pending.",
+  "image": "ghcr.io/ryoheitanaka/runpod-templates-vllm:latest-vllm0.34.0",
+  "allowedCudaVersions": ["13.0"],
+  "containerDiskInGb": 30,
+  "volumeInGb": 50,
+  "ports": ["22/tcp"],
+  "env": {
+    "MODEL_ID": "Qwen/Qwen3-8B",
+    "MAX_MODEL_LEN": "32768",
+    "GPU_MEMORY_UTILIZATION": "0.95",
+    "ENABLE_AUTO_TOOL_CHOICE": "true",
+    "TOOL_CALL_PARSER": "hermes",
+    "ENFORCE_EAGER": "true",
+    "VLLM_API_KEY": "your-vllm-api-key",
+    "HF_TOKEN": "your-huggingface-token",
+    "VLLM_EXTRA_ARGS_JSON": "[]"
+  }
+}

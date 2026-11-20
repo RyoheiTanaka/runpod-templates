@@ -1,0 +1,15 @@
+Port 22
+ListenAddress 0.0.0.0
+PermitRootLogin prohibit-password
+PubkeyAuthentication yes
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PermitEmptyPasswords no
+UsePAM yes
+AuthorizedKeysFile /root/.ssh/authorized_keys
+AllowTcpForwarding local
+PermitOpen localhost:8000 127.0.0.1:8000
+AllowAgentForwarding no
+X11Forwarding no
+PermitTunnel no
+Subsystem sftp internal-sftp
