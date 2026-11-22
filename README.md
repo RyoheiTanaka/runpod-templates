@@ -4,6 +4,10 @@ RunPod で AI 環境を起動するためのテンプレート集です。
 
 この repo には公開利用者向けの配布物だけを置きます。作業メモ、検証ログ、API key、template ID、pod ID は含めません。
 
+## 開発中
+
+- [vLLM + SSH](templates/vllm/README.md): モデルIDを指定できる推論API用Pod。SSH鍵の設定とsshd起動を含む。A40（host CUDA 13.2）でSSH・認証付きチャット・ツール呼び出しのプライベート検証済み。一般公開は未実施。
+
 ## Templates
 
 wan22 / acestep15xl は CUDA 12.8 image を推奨、CUDA 13.0 image を選択肢として用意しています。

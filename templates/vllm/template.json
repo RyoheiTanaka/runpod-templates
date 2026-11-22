@@ -1,0 +1,24 @@
+{
+  "name": "vLLM-SSH-FreeCraftLog",
+  "description": "vLLM with configurable model ID and automatic SSH startup. Privately smoke-tested with Qwen3-8B on A40 (host CUDA 13.2). Set your API key and SSH credentials before deployment.",
+  "image": "ghcr.io/ryoheitanaka/runpod-templates-vllm@sha256:b62e7532c8e833a935d117b99095d3b5f6e3339ea424b5b8ca15578b8798659b",
+  "allowedCudaVersions": [
+    "13.2"
+  ],
+  "containerDiskInGb": 30,
+  "volumeInGb": 0,
+  "ports": [
+    "22/tcp"
+  ],
+  "env": {
+    "MODEL_ID": "Qwen/Qwen3-8B",
+    "MAX_MODEL_LEN": "32768",
+    "GPU_MEMORY_UTILIZATION": "0.95",
+    "ENABLE_AUTO_TOOL_CHOICE": "true",
+    "TOOL_CALL_PARSER": "hermes",
+    "ENFORCE_EAGER": "true",
+    "VLLM_API_KEY": "your-vllm-api-key",
+    "HF_TOKEN": "your-huggingface-token",
+    "VLLM_EXTRA_ARGS_JSON": "[]"
+  }
+}

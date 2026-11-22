@@ -1,0 +1,39 @@
+name: Build vLLM SSH image
+
+# Build runtime changes on main; release tags and manual runs also publish images.
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+    paths:
+      - templates/vllm/Dockerfile
+      - templates/vllm/Dockerfile.dockerignore
+      - templates/vllm/start.py
+      - templates/vllm/sshd_config
+      - .github/workflows/build-vllm.yml
+      - .github/workflows/_build-image.yml
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -s templates/vllm -p 'test_*.py' -v
+  build:
+    needs: check
+    uses: ./.github/workflows/_build-image.yml
+    with:
+      name: vllm
+      image: runpod-templates-vllm
+      tag: vllm0.34.0
+      base: vllm/vllm-openai:v0.34.0
