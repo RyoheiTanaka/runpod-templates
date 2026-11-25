@@ -3,6 +3,7 @@
 WindowsのPowerShellとローカルのOpenCodeから、RunPod上のQwen3-8Bへ接続する。
 接続経路は **OpenCode → ローカル8000番 → SSHトンネル → Pod内127.0.0.1:8000のvLLM**。
 AIが作成するファイルは、OpenCodeを起動したローカルの作業フォルダへ保存される。
+Git Bashで実行する場合のコマンドは、末尾の「付録 Git Bashで実行する場合」にまとめた。
 
 ## 確認済みの範囲
 
@@ -232,6 +233,127 @@ SSHトンネルを閉じただけではPodは止まらない。ローカルのTo
 ```powershell
 Remove-Item Env:VLLM_API_KEY
 Remove-Variable headers, models, reply, payload -ErrorAction SilentlyContinue
+```
+
+## 付録 Git Bashで実行する場合
+
+本文の§1・§3〜§7のコマンドを、Git for WindowsのGit Bashで実行する形に置き換えたもの。
+手順の順番と注意点は本文と同じ。ここではコマンドだけを示す。
+Git Bash同梱の `ssh`・`curl` を使い、`jq` やPythonは使わない。
+
+OpenCodeの画面を崩さないため、Git BashはWindows Terminalのタブで開く。
+mintty単体では、貼り付けがShift+Insertになるなど操作が変わる。
+
+2026-11-25に、Git Bash（OpenSSH 10.2）で各コマンドが存在すること、JSONの取り出しを見本のJSONで、
+トンネルなしで `/health` が `000` になることまでを確認した。Podへ接続した状態での実行は未確認。
+
+| 本文（PowerShell） | Git Bash |
+| --- | --- |
+| `Read-Host -AsSecureString`（`*` が表示される） | `read -rs`（何も表示されない） |
+| `Invoke-WebRequest` / `Invoke-RestMethod` | `curl` |
+| `$env:USERPROFILE\Projects\runpod-opencode-test` | `~/Projects/runpod-opencode-test` |
+| `Get-Item` / `Start-Process` | `ls -l` / `start` |
+
+### §1 前提
+
+```bash
+opencode --version
+ssh -V
+```
+
+### §3 SSHトンネル（ターミナルA）
+
+```bash
+POD_HOST='PODのIPアドレス'
+SSH_PORT=22000 # Connect画面に表示されたポートへ変更
+KEY_PATH=~/.ssh/自分の秘密鍵ファイル名
+
+ssh -i "$KEY_PATH" -p "$SSH_PORT" \
+  -o ExitOnForwardFailure=yes \
+  -o ServerAliveInterval=30 \
+  -N -L 127.0.0.1:8000:localhost:8000 "root@$POD_HOST"
+```
+
+Git BashのホームはWindowsのユーザーフォルダと同じなので、`~/.ssh` は本文の `$env:USERPROFILE\.ssh` と同じ場所。
+
+### §4 APIの確認（ターミナルB）
+
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' --max-time 5 http://127.0.0.1:8000/health
+```
+
+`200` で準備完了。`000` は接続拒否で、モデル読み込み中のことが多い。待つ場合は15秒おきに確認できる。
+
+```bash
+until [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:8000/health)" = 200 ]; do
+  echo "$(date +%T)  まだ"; sleep 15
+done; echo "$(date +%T)  200"
+```
+
+APIキーを読み込む。入力値は画面へ表示されない。`export` してOpenCodeへ引き継がせる。
+
+```bash
+read -rsp 'Podに設定したVLLM_API_KEY: ' VLLM_API_KEY; echo
+export VLLM_API_KEY
+
+curl -s -H "Authorization: Bearer $VLLM_API_KEY" http://127.0.0.1:8000/v1/models \
+  | grep -oE '"(id|max_model_len)": ?("[^"]*"|[0-9]+)'
+```
+
+`"id":"Qwen/Qwen3-8B"` と `"max_model_len":32768` が出ればよい。何も出ない場合は、`| grep ...` を外して
+応答をそのまま見る。401なら、Podと手元のキーが一致しているか確認する。
+
+チャット：
+
+```bash
+curl -s http://127.0.0.1:8000/v1/chat/completions \
+  -H "Authorization: Bearer $VLLM_API_KEY" -H 'Content-Type: application/json' \
+  -d '{"model":"Qwen/Qwen3-8B","messages":[{"role":"user","content":"Reply with the word OK."}],"max_tokens":128,"chat_template_kwargs":{"enable_thinking":false}}' \
+  | grep -oE '"content": ?"[^"]*"'
+```
+
+### §5 作業フォルダとOpenCode設定（ターミナルB、リポジトリのルートで）
+
+```bash
+REPO_ROOT=$(pwd)
+WORK_DIR=~/Projects/runpod-opencode-test
+mkdir -p "$WORK_DIR"
+if [ -e "$WORK_DIR/opencode.json" ]; then
+  echo 'opencode.jsonが既にあります。上書きせず別フォルダを選んでください。'
+else
+  cp "$REPO_ROOT/templates/vllm/examples/opencode.json" "$WORK_DIR/opencode.json"
+  cd "$WORK_DIR"
+fi
+```
+
+ローカル8000番を18000番へ変えた場合は、`baseURL` も合わせる。
+
+```bash
+sed -i 's/127.0.0.1:8000/127.0.0.1:18000/' opencode.json
+```
+
+### §6 OpenCodeの起動とファイルの確認
+
+APIキーを `export` した**同じターミナルB**で実行する。
+
+```bash
+opencode --standalone
+```
+
+依頼文と追加依頼は本文と同じ。ファイルの実在は別のGit Bashで確認する。
+
+```bash
+cd ~/Projects/runpod-opencode-test && ls -l
+start todo-app.html
+```
+
+### §7 終了
+
+OpenCodeを終了し、ターミナルAでCtrl+C、RunPodでPodを停止・削除する（本文と同じ）。
+ターミナルBの一時的なキーを消す場合：
+
+```bash
+unset VLLM_API_KEY
 ```
 
 ## 困ったときの確認先
